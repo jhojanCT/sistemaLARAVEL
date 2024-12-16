@@ -23,10 +23,13 @@ return new class extends Migration
             $table->decimal('precio_venta', 10, 2); // El precio por kg
             $table->string('supervisor');
             $table->date('fecha_entrada');
+
+            // Relación con la tabla filtros
+            $table->foreignId('filtro_id')->constrained('filtros')->onDelete('cascade');
+
             $table->timestamps();
         });
     }
-    
 
     /**
      * Reverse the migrations.

@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Entrada;
 use App\Models\Producto;
 use App\Models\Proveedor;
-use App\Models\Filtro; // Asegúrate de tener el modelo Filtro
+use App\Models\Filtro; 
 use Illuminate\Http\Request;
 
 class EntradaController extends Controller
 {
     public function index()
     {
-        $entradas = Entrada::with(['producto', 'proveedor'])->get();
+        $entradas = Entrada::with(['producto', 'proveedor', 'filtro'])->get();
         return view('entradas.index', compact('entradas'));
     }
 
@@ -20,43 +20,29 @@ class EntradaController extends Controller
     {
         $productos = Producto::all();
         $proveedores = Proveedor::all();
-        return view('entradas.create', compact('productos', 'proveedores'));
+        $filtros = Filtro::with('producto')->get();
+        return view('entradas.create', compact('productos', 'proveedores', 'filtros'));
     }
 
     public function store(Request $request)
     {
-        // Validaciones de los nuevos campos
-        $request->validate([
-            'producto_id' => 'required|exists:productos,id',
-            'proveedor_id' => 'required|exists:proveedores,id',
-            'cantidad' => 'required|integer|min:1',
-            'precio_venta' => 'required|numeric|min:0',
-            'fecha_entrada' => 'required|date',
-            'existencia_filtrada' => 'required|numeric|min:0', // Añadir existencia filtrada
-        ]);
+        $validated = $this->validateRequest($request);
 
-        // Obtener la cantidad filtrada de la tabla Filtros
-        $filtro = Filtro::where('producto_id', $request->producto_id)
-            ->latest('fecha_filtro')
-            ->first();
-
-        // Validación para asegurar que haya filtrado antes
-        if (!$filtro || $filtro->existencia_total_filtrada < $request->existencia_filtrada) {
-            return back()->withErrors('La cantidad filtrada no es válida.');
-        }
+        // Buscar el filtro relacionado
+        $filtro = $this->getFiltro($validated['producto_id'], $validated['existencia_filtrada']);
 
         // Crear la entrada
-        $entrada = Entrada::create([
-            'producto_id' => $request->producto_id,
-            'proveedor_id' => $request->proveedor_id,
-            'cantidad' => $request->cantidad,
-            'precio_venta' => $request->precio_venta,
-            'fecha_entrada' => $request->fecha_entrada,
-            'existencia_total' => $filtro->existencia_total_inicial + $request->existencia_filtrada, // Sumar la cantidad inicial y filtrada
-            'existencia_actual' => $request->existencia_filtrada,
-            'existencia_actual_en_uso' => 0, // Inicialmente no hay uso
-            'porcentaje_elaboracion' => 0, // Este porcentaje puede actualizarse cuando se comience a usar el producto
-            'supervisor' => $request->supervisor ?? 'Desconocido', // Si es necesario
+        Entrada::create([
+            'producto_id' => $validated['producto_id'],
+            'proveedor_id' => $validated['proveedor_id'],
+            'cantidad' => $validated['cantidad'],
+            'precio_venta' => $validated['precio_venta'],
+            'fecha_entrada' => $validated['fecha_entrada'],
+            'existencia_total' => $filtro->existencia_total_inicial + $validated['existencia_filtrada'],
+            'existencia_actual' => $validated['existencia_filtrada'],
+            'existencia_actual_en_uso' => 0,
+            'porcentaje_elaboracion' => 0,
+            'supervisor' => $validated['supervisor'] ?? 'Desconocido',
         ]);
 
         return redirect()->route('entradas.index')->with('success', 'Entrada creada exitosamente.');
@@ -72,36 +58,24 @@ class EntradaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'producto_id' => 'required|exists:productos,id',
-            'proveedor_id' => 'required|exists:proveedores,id',
-            'cantidad' => 'required|integer|min:1',
-            'precio_venta' => 'required|numeric|min:0',
-            'fecha_entrada' => 'required|date',
-            'existencia_filtrada' => 'required|numeric|min:0', // Añadir existencia filtrada
-        ]);
+        $validated = $this->validateRequest($request);
 
-        // Buscar el filtro más reciente
-        $filtro = Filtro::where('producto_id', $request->producto_id)
-            ->latest('fecha_filtro')
-            ->first();
+        // Buscar el filtro relacionado
+        $filtro = $this->getFiltro($validated['producto_id'], $validated['existencia_filtrada']);
 
-        if (!$filtro || $filtro->existencia_total_filtrada < $request->existencia_filtrada) {
-            return back()->withErrors('La cantidad filtrada no es válida.');
-        }
-
+        // Actualizar la entrada
         $entrada = Entrada::findOrFail($id);
         $entrada->update([
-            'producto_id' => $request->producto_id,
-            'proveedor_id' => $request->proveedor_id,
-            'cantidad' => $request->cantidad,
-            'precio_venta' => $request->precio_venta,
-            'fecha_entrada' => $request->fecha_entrada,
-            'existencia_total' => $filtro->existencia_total_inicial + $request->existencia_filtrada, // Sumar la cantidad inicial y filtrada
-            'existencia_actual' => $request->existencia_filtrada,
-            'existencia_actual_en_uso' => $entrada->existencia_actual_en_uso, // Mantener el mismo valor para la existencia en uso
-            'porcentaje_elaboracion' => $entrada->porcentaje_elaboracion, // Mantener el mismo valor si no se ha usado
-            'supervisor' => $request->supervisor ?? $entrada->supervisor, // Mantener el supervisor anterior si no se pasa uno nuevo
+            'producto_id' => $validated['producto_id'],
+            'proveedor_id' => $validated['proveedor_id'],
+            'cantidad' => $validated['cantidad'],
+            'precio_venta' => $validated['precio_venta'],
+            'fecha_entrada' => $validated['fecha_entrada'],
+            'existencia_total' => $filtro->existencia_total_inicial + $validated['existencia_filtrada'],
+            'existencia_actual' => $validated['existencia_filtrada'],
+            'existencia_actual_en_uso' => $entrada->existencia_actual_en_uso,
+            'porcentaje_elaboracion' => $entrada->porcentaje_elaboracion,
+            'supervisor' => $validated['supervisor'] ?? $entrada->supervisor,
         ]);
 
         return redirect()->route('entradas.index')->with('success', 'Entrada actualizada exitosamente.');
@@ -112,5 +86,36 @@ class EntradaController extends Controller
         $entrada = Entrada::findOrFail($id);
         $entrada->delete();
         return redirect()->route('entradas.index')->with('success', 'Entrada eliminada exitosamente.');
+    }
+
+    /**
+     * Valida los datos de una solicitud.
+     */
+    private function validateRequest(Request $request)
+    {
+        return $request->validate([
+            'producto_id' => 'required|exists:productos,id',
+            'proveedor_id' => 'required|exists:proveedores,id',
+            'cantidad' => 'required|integer|min:1',
+            'precio_venta' => 'required|numeric|min:0',
+            'fecha_entrada' => 'required|date',
+            'existencia_filtrada' => 'required|numeric|min:0',
+        ]);
+    }
+
+    /**
+     * Obtiene el filtro más reciente y verifica la cantidad filtrada.
+     */
+    private function getFiltro($productoId, $existenciaFiltrada)
+    {
+        $filtro = Filtro::where('producto_id', $productoId)
+            ->latest('fecha_filtro')
+            ->first();
+
+        if (!$filtro || $filtro->existencia_total_filtrada < $existenciaFiltrada) {
+            abort(400, 'La cantidad filtrada no es válida.');
+        }
+
+        return $filtro;
     }
 }
