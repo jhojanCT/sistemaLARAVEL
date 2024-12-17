@@ -1,0 +1,171 @@
+/* Fondo general de la página */
+body {
+    background-color: #a6e6a9; /* Verde de fondo */
+    color: #000000; /* Blanco */
+    font-family: Arial, sans-serif;
+}
+
+/* Contenedor principal */
+.container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #FFFFFF; /* Blanco */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezados */
+h1, h2, h3 {
+    margin-bottom: 15px;
+    color: #4CAF50; /* Verde claro */
+    font-weight: bold;
+    letter-spacing: 1px; /* Espaciado entre letras */
+    text-transform: uppercase; /* Mayúsculas */
+}
+
+/* Botón principal */
+.btn-primary {
+    background-color: #4CAF50; /* Verde claro */
+    border-color: #4CAF50; /* Verde claro */
+    color: #FFFFFF; /* Blanco */
+    padding: 8px 16px;  /* Tamaño adecuado */
+    font-size: 1rem;    /* Tamaño de texto adecuado */
+    font-weight: bold;  /* Texto en negrita */
+    border-radius: 5px; /* Bordes redondeados */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Transición suave */
+}
+
+.btn-primary:hover {
+    background-color: #388E3C; /* Verde más oscuro al hacer hover */
+    border-color: #388E3C;
+    transform: scale(1.05); /* Efecto de crecimiento al pasar el ratón */
+}
+
+/* Botón Editar */
+.btn-warning {
+    background-color: #FFB300; /* Amarillo intenso */
+    border-color: #FFB300; /* Amarillo intenso */
+    color: #FFFFFF; /* Blanco */
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-warning:hover {
+    background-color: #FFA000;
+    border-color: #FFA000;
+}
+
+/* Botón Eliminar */
+.btn-danger {
+    background-color: #F44336; /* Rojo */
+    border-color: #F44336; /* Rojo */
+    color: #FFFFFF; /* Blanco */
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #D32F2F;
+    border-color: #D32F2F;
+}
+
+/* Barra de navegación */
+.navbar {
+    background: linear-gradient(135deg, #FBC02D, #F9A825); /* Amarillo bajo y amarillo intenso */
+    color: #FFFFFF; /* Blanco */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 15px 40px; /* Aumentar el espacio alrededor de los elementos */
+    display: flex;
+    justify-content: space-between; /* Separar los enlaces de forma equitativa */
+    align-items: center;
+}
+
+/* Enlaces en la barra de navegación */
+.navbar a {
+    color: #FFFFFF; /* Blanco */
+    font-weight: bold;
+    font-size: 1.4rem; /* Aumentar aún más el tamaño de la fuente */
+    margin: 0 20px; /* Espacio entre los enlaces */
+    transition: color 0.3s ease-in-out;
+}
+
+/* Cambiar color del enlace cuando el mouse pasa sobre él */
+.navbar a:hover {
+    color: #333; /* Oscuro al pasar el mouse */
+    text-decoration: underline; /* Subrayado al pasar el ratón */
+}
+
+/* Aumentar el tamaño de la fuente cuando se hace clic en un enlace activo */
+.navbar a.active {
+    font-size: 1.5rem; /* Mayor tamaño cuando es activo */
+    color: #FFB300; /* Amarillo para el enlace activo */
+}
+
+/* Tablas */
+.table {
+    background-color: #FFFFFF; /* Blanco */
+    color: #000; /* Negro */
+    border-radius: 10px;
+    border-collapse: separate;
+    width: 100%;
+}
+
+.table thead th {
+    background-color: #FBC02D; /* Amarillo bajo */
+    color: #333;
+    text-align: center;
+    font-size: 1.1rem;
+    padding: 15px 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* Filas "zebra" */
+.table tbody tr:nth-child(odd) {
+    background-color: #F5F5F5; /* Fondo gris claro */
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #E8F5E9; /* Verde muy claro */
+}
+
+/* Filas hover */
+.table-hover tbody tr:hover {
+    background-color: #C8E6C9; /* Verde claro */
+    color: #000;
+}
+
+.table td, .table th {
+    padding: 15px 10px;
+    text-align: center;
+}
+
+/* Sombras para tablas y botones */
+.card, .table, .btn {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Efecto hover con sombra */
+.card:hover, .table-hover tbody tr:hover, .btn:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.02); /* Efecto sutil de crecimiento */
+    transition: all 0.3s ease-in-out;
+}
+
+/* Iconos en botones */
+.btn i {
+    font-size: 1.2rem;
+}
+
+/* Redondear bordes de las tarjetas */
+.card, .table, .btn {
+    border-radius: 10px;
+}
+
