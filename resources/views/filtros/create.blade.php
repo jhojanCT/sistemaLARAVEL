@@ -32,7 +32,7 @@
             </div>
             <div class="form-group">
                 <label for="existencia_filtrada">Existencia Filtrada</label>
-                <input type="number" name="existencia_filtrada" id="existencia_filtrada" class="form-control" step="0.01" required>
+                <input type="number" name="existencia_filtrada" id="existencia_filtrada" class="form-control" step="0.01" required readonly>
             </div>
             <div class="form-group">
                 <label for="supervisor">Supervisor</label>
@@ -45,4 +45,22 @@
             <button type="submit" class="btn btn-success mt-3">Guardar</button>
         </form>
     </div>
+
+    <script>
+        // Escuchar los cambios en los campos 'cantidad_usada' y 'desperdicio'
+        document.getElementById('cantidad_usada').addEventListener('input', calcularExistenciaFiltrada);
+        document.getElementById('desperdicio').addEventListener('input', calcularExistenciaFiltrada);
+
+        function calcularExistenciaFiltrada() {
+            // Obtener los valores de los campos
+            let cantidadUsada = parseFloat(document.getElementById('cantidad_usada').value) || 0;
+            let desperdicio = parseFloat(document.getElementById('desperdicio').value) || 0;
+
+            // Calcular la existencia filtrada
+            let existenciaFiltrada = cantidadUsada - desperdicio;
+
+            // Mostrar el resultado en el campo 'existencia_filtrada'
+            document.getElementById('existencia_filtrada').value = existenciaFiltrada.toFixed(2);
+        }
+    </script>
 @endsection
