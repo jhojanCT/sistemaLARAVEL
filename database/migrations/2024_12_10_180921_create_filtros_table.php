@@ -13,18 +13,16 @@ return new class extends Migration
     {
         Schema::create('filtros', function (Blueprint $table) {
             $table->id();
-            $table->string('categoria');
-            $table->string('producto');
-            $table->string('proveedor');
-            $table->decimal('existencia_total_inicial', 10, 2); // 10 kg
-            $table->decimal('desperdicio', 10, 2); // 2 kg
-            $table->decimal('existencia_total_filtrada', 10, 2); // 8 kg
-            $table->string('filtrado_supervisor');
+            $table->foreignId('proveedor_id')->constrained('proveedores')->onDelete('cascade');
+            $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');
+            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
+            $table->decimal('cantidad_usada', 10, 2); // Lo que se utiliza para el filtrado
+            $table->decimal('desperdicio', 10, 2);
+            $table->decimal('existencia_filtrada', 10, 2);
+            $table->string('supervisor');
             $table->date('fecha_filtro');
             $table->timestamps();
         });
-
-
     }
 
     /**

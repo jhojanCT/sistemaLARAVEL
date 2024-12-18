@@ -22,6 +22,8 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('roles.index') }}">Roles</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('salidas.index') }}">Salidas</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('usuarios.index') }}">Usuarios</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('almacen-sin-filtro.index') }}">Almacen sin filtro</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('almacen-filtrado.index') }}">Almacen filtrado</a></li>
             </ul>
         </div>
     </nav>

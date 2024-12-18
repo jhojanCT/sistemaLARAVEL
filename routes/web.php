@@ -10,6 +10,8 @@ use App\Http\Controllers\SalidaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\RolController;
+use App\Http\Controllers\AlmacenFiltradoController;
+use App\Http\Controllers\AlmacenSinFiltroController;
 
 // Rutas para Categorías
 Route::prefix('categorias')->group(function () {
@@ -50,6 +52,27 @@ Route::prefix('filtros')->group(function () {
     Route::put('{filtro}', [FiltroController::class, 'update'])->name('filtros.update'); // Actualizar filtro
     Route::delete('{filtro}', [FiltroController::class, 'destroy'])->name('filtros.destroy'); // Eliminar filtro
 });
+
+// Rutas para AlmacenFiltrado
+Route::prefix('almacen-filtrado')->group(function () {
+    Route::get('/', [AlmacenFiltradoController::class, 'index'])->name('almacen-filtrado.index'); // Ver todos los registros de almacen filtrado
+    Route::get('create', [AlmacenFiltradoController::class, 'create'])->name('almacen-filtrado.create'); // Crear nuevo registro de almacen filtrado
+    Route::post('/', [AlmacenFiltradoController::class, 'store'])->name('almacen-filtrado.store'); // Guardar almacen filtrado
+    Route::get('{almacenFiltrado}/edit', [AlmacenFiltradoController::class, 'edit'])->name('almacen-filtrado.edit'); // Editar almacen filtrado
+    Route::put('{almacenFiltrado}', [AlmacenFiltradoController::class, 'update'])->name('almacen-filtrado.update'); // Actualizar almacen filtrado
+    Route::delete('{almacenFiltrado}', [AlmacenFiltradoController::class, 'destroy'])->name('almacen-filtrado.destroy'); // Eliminar almacen filtrado
+});
+
+// Rutas para AlmacenSinFiltro
+Route::prefix('almacen-sin-filtro')->group(function () {
+    Route::get('/', [AlmacenSinFiltroController::class, 'index'])->name('almacen-sin-filtro.index'); // Ver todos los registros de almacen sin filtro
+    Route::get('create', [AlmacenSinFiltroController::class, 'create'])->name('almacen-sin-filtro.create'); // Crear nuevo registro de almacen sin filtro
+    Route::post('/', [AlmacenSinFiltroController::class, 'store'])->name('almacen-sin-filtro.store'); // Guardar almacen sin filtro
+    Route::get('{almacenSinFiltro}/edit', [AlmacenSinFiltroController::class, 'edit'])->name('almacen-sin-filtro.edit'); // Editar almacen sin filtro
+    Route::put('{almacenSinFiltro}', [AlmacenSinFiltroController::class, 'update'])->name('almacen-sin-filtro.update'); // Actualizar almacen sin filtro
+    Route::delete('{almacenSinFiltro}', [AlmacenSinFiltroController::class, 'destroy'])->name('almacen-sin-filtro.destroy'); // Eliminar almacen sin filtro
+});
+
 
 // Rutas para Entradas
 Route::prefix('entradas')->group(function () {

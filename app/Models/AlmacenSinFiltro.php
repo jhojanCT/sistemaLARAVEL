@@ -5,20 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Filtro extends Model
+class AlmacenSinFiltro extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'proveedor_id',
-        'producto_id',
-        'categoria_id',
-        'cantidad_usada',
-        'desperdicio',
-        'existencia_filtrada',
-        'supervisor',
-        'fecha_filtro'
-    ];
+    protected $table = 'almacen_sin_filtro';
+
+    protected $fillable = ['proveedor_id', 'producto_id', 'categoria_id', 'cantidad', 'encargado', 'fecha_llegada'];
 
     public function proveedor()
     {
