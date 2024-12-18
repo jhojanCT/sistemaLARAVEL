@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('almacen_filtrado', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');
-            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
-            $table->decimal('cantidad', 10, 2); // Materia prima filtrada
+            $table->foreignId('proveedor_id')->constrained('proveedores')->onDelete('cascade');
+            $table->string('materia_prima_filtrada');
+            $table->decimal('cantidad_materia_prima_filtrada', 10, 2); // Total acumulado
             $table->timestamps();
         });
+        
     }
 
     /**

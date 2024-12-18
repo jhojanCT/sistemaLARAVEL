@@ -18,12 +18,13 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('proveedores.index') }}">Proveedores</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('clientes.index') }}">Clientes</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('entradas.index') }}">Entradas</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('filtros.index') }}">Filtros</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('roles.index') }}">Roles</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('salidas.index') }}">Salidas</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('usuarios.index') }}">Usuarios</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('almacen-sin-filtro.index') }}">Almacen sin filtro</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('almacen-filtrado.index') }}">Almacen filtrado</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('filtros.index') }}">Filtros</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('almacen_sin_filtro.index') }}">Almacen sin filtro</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('almacen_filtrado.index') }}">Almacen filtrado</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('control_entrada_materia_prima.index') }}">Control De Entrada</a></li>
             </ul>
         </div>
     </nav>

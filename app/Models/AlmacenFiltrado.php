@@ -11,15 +11,41 @@ class AlmacenFiltrado extends Model
 
     protected $table = 'almacen_filtrado';
 
-    protected $fillable = ['producto_id', 'categoria_id', 'cantidad'];
+    protected $fillable = [
+        'proveedor_id',
+        'materia_prima_filtrada',
+        'cantidad_materia_prima_filtrada',
+    ];
 
-    public function producto()
+    /**
+     * Relación con la tabla Proveedores
+     */
+    public function proveedor()
     {
-        return $this->belongsTo(Producto::class);
+        return $this->belongsTo(Proveedor::class);
     }
 
-    public function categoria()
+    /**
+     * Actualiza o crea el registro consolidado en AlmacenFiltrado
+     */
+    public static function actualizarAlmacen($filtro)
     {
-        return $this->belongsTo(Categoria::class);
+        // Busca si ya existe un registro para el mismo proveedor y materia prima
+        $registro = self::where('proveedor_id', $filtro->proveedor_id)
+            ->where('materia_prima_filtrada', $filtro->almacenSinFiltro->materia_prima)
+            ->first();
+
+        if ($registro) {
+            // Si existe, actualiza la cantidad de materia prima filtrada
+            $registro->cantidad_materia_prima_filtrada += $filtro->existencia_filtrada;
+            $registro->save();
+        } else {
+            // Si no existe, crea un nuevo registro
+            self::create([
+                'proveedor_id' => $filtro->proveedor_id,
+                'materia_prima_filtrada' => $filtro->almacenSinFiltro->materia_prima,
+                'cantidad_materia_prima_filtrada' => $filtro->existencia_filtrada,
+            ]);
+        }
     }
 }

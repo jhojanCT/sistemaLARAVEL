@@ -9,29 +9,49 @@ class Filtro extends Model
 {
     use HasFactory;
 
+    protected $table = 'filtros';
+
     protected $fillable = [
         'proveedor_id',
-        'producto_id',
-        'categoria_id',
+        'almacen_sin_filtro_id',
         'cantidad_usada',
         'desperdicio',
         'existencia_filtrada',
         'supervisor',
-        'fecha_filtro'
+        'fecha_filtro',
     ];
 
+    /**
+     * Relación con la tabla Proveedor
+     */
     public function proveedor()
     {
         return $this->belongsTo(Proveedor::class);
     }
 
-    public function producto()
+    /**
+     * Relación con la tabla AlmacenSinFiltro
+     */
+    public function almacenSinFiltro()
     {
-        return $this->belongsTo(Producto::class);
+        return $this->belongsTo(AlmacenSinFiltro::class);
     }
 
-    public function categoria()
+    /**
+     * Relación con la tabla AlmacenFiltrado
+     */
+    public function almacenFiltrado()
     {
-        return $this->belongsTo(Categoria::class);
+        return $this->hasOne(AlmacenFiltrado::class);
+    }
+
+    /**
+     * Evento para actualizar el AlmacenFiltrado
+     */
+    protected static function booted()
+    {
+        static::created(function ($filtro) {
+            AlmacenFiltrado::actualizarAlmacen($filtro);
+        });
     }
 }

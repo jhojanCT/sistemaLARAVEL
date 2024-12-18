@@ -26,4 +26,8 @@ class Proveedor extends Model
     {
         return $this->hasMany(Producto::class);
     }
+    public function almacenesFiltrados()
+    {
+        return $this->hasMany(AlmacenFiltrado::class, 'proveedor_id');
+    }
 }
