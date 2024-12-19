@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('content'); ?>
 <div class="container">
     <h2>Entradas de Producción</h2>
@@ -11,7 +9,6 @@
             <tr>
                 <th>Producto</th>
                 <th>Cantidad de Materia Prima en Uso</th>
-                <th>Código de Lote</th>
                 <th>Estado de Producción</th>
                 <th>Fecha de Entrada</th>
                 <th>Acciones</th>
@@ -22,7 +19,6 @@
             <tr>
                 <td><?php echo e($entrada->producto->nombre); ?></td>
                 <td><?php echo e($entrada->materia_prima_en_uso); ?></td>
-                <td><?php echo e($entrada->codigo_lote); ?></td>
                 <td><?php echo e($entrada->estado_produccion); ?></td>
                 <td><?php echo e($entrada->fecha_entrada); ?></td>
                 <td>
