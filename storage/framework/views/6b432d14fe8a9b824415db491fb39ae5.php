@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('content'); ?>
     <div class="container">
         <h2>Agregar Nueva Entrada de Materia Prima</h2>

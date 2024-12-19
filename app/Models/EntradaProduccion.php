@@ -34,5 +34,9 @@ class EntradaProduccion extends Model
     {
         return $this->belongsTo(AlmacenFiltrado::class);
     }
+    public function salidasProduccion()
+    {
+        return $this->hasMany(SalidaProduccion::class);
+    }
 }
     

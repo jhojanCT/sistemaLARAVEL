@@ -7,6 +7,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Producto</th>
                 <th>Cantidad de Materia Prima en Uso</th>
                 <th>Estado de Producción</th>
@@ -17,6 +18,7 @@
         <tbody>
             <?php $__currentLoopData = $entradas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $entrada): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <tr>
+                <td><?php echo e($entrada->id); ?></td>
                 <td><?php echo e($entrada->producto->nombre); ?></td>
                 <td><?php echo e($entrada->materia_prima_en_uso); ?></td>
                 <td><?php echo e($entrada->estado_produccion); ?></td>

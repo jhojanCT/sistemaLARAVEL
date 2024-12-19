@@ -30,8 +30,9 @@ Route::resource('usuarios', UsuarioController::class);
 Route::resource('roles', RolController::class);
 Route::resource('control_entrada_materia_prima', ControlEntradaMateriaPrimaController::class);
 Route::post('entradas_produccion/{id}/finalizar', [EntradaProduccionController::class, 'finalizar'])->name('entradas_produccion.finalizar');
-
-
+Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::class, 'aprobar'])->name('salidas_produccion.aprobar');
+Route::delete('salidas_produccion/{salida}', [SalidaProduccionController::class, 'eliminar'])->name('salidas_produccion.eliminar');
+Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::class, 'aprobar'])->name('salidas_produccion.aprobar');
 
 
 

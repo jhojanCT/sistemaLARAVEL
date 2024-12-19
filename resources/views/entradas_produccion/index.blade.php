@@ -9,6 +9,7 @@
     <table class="table">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Producto</th>
                 <th>Cantidad de Materia Prima en Uso</th>
                 <th>Estado de Producción</th>
@@ -19,6 +20,7 @@
         <tbody>
             @foreach ($entradas as $entrada)
             <tr>
+                <td>{{ $entrada->id }}</td>
                 <td>{{ $entrada->producto->nombre }}</td>
                 <td>{{ $entrada->materia_prima_en_uso }}</td>
                 <td>{{ $entrada->estado_produccion }}</td>
