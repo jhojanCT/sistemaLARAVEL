@@ -6,8 +6,10 @@ use App\Models\EntradaProduccion;
 use App\Models\Producto;
 use App\Models\AlmacenFiltrado;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-class EntradaProduccionController extends Controller
+
+class EntradaProduccionController extends Controller            
 {
     public function index()
     {
@@ -15,54 +17,50 @@ class EntradaProduccionController extends Controller
         return view('entradas_produccion.index', compact('entradas'));
     }
 
+    public function finalizar($id)
+    {
+        $entrada = EntradaProduccion::findOrFail($id);
+        $entrada->estado_produccion = 'finalizado';
+        $entrada->save();
+
+        return redirect()->route('entradas_produccion.index')->with('success', 'Producción finalizada con éxito.');
+    }
+
     public function create()
     {
-        $almacenFiltrado = AlmacenFiltrado::all(); // Recuperamos todas las materias primas en almacen_filtrado
-        $productos = Producto::all(); // Recuperamos todos los productos
-    
+        $almacenFiltrado = AlmacenFiltrado::all();
+        $productos = Producto::all();
         return view('entradas_produccion.create', compact('almacenFiltrado', 'productos'));
     }
-    
 
     public function store(Request $request)
     {
-        $request->validate([
-            'producto_id' => 'required|exists:productos,id',
-            'almacen_filtrado_id' => 'required|exists:almacen_filtrado,id',
-            'materia_prima_en_uso' => 'required|numeric|min:0',
-            'cantidad_producto' => 'required|numeric|min:0',
-            'precio_venta' => 'required|numeric|min:0',
-            'fecha_entrada' => 'required|date',
-        ]);
+        DB::beginTransaction();
     
-        // Crear nueva entrada de producción
-        $entradaProduccion = new EntradaProduccion();
-        $entradaProduccion->producto_id = $request->producto_id;
-        $entradaProduccion->almacen_filtrado_id = $request->almacen_filtrado_id;
-        $entradaProduccion->materia_prima_en_uso = $request->materia_prima_en_uso;
-        $entradaProduccion->cantidad_producto = $request->cantidad_producto;
-        $entradaProduccion->precio_venta = $request->precio_venta;
-        $entradaProduccion->fecha_entrada = $request->fecha_entrada;
+        try {
+            $entradaProduccion = new EntradaProduccion();
+            $entradaProduccion->producto_id = $request->producto_id;
+            $entradaProduccion->almacen_filtrado_id = $request->almacen_filtrado_id;
+            $entradaProduccion->materia_prima_en_uso = $request->materia_prima_en_uso;
+            $entradaProduccion->estado_produccion = 'en proceso';
+            $entradaProduccion->fecha_entrada = now();
     
-        // Actualizar la cantidad en almacen filtrado
-        $almacenFiltrado = AlmacenFiltrado::find($request->almacen_filtrado_id);
-    
-        if ($almacenFiltrado) {
-            // Restar la cantidad de materia prima utilizada
-            $almacenFiltrado->cantidad_materia_prima_filtrada -= $request->materia_prima_en_uso;
-            $almacenFiltrado->save();
-        } else {
-            return back()->with('error', 'Materia Prima no encontrada en el almacén filtrado.');
+            $almacenFiltrado = AlmacenFiltrado::findOrFail($request->almacen_filtrado_id);
+            if ($almacenFiltrado->cantidad_materia_prima_filtrada >= $request->materia_prima_en_uso) {
+                $almacenFiltrado->cantidad_materia_prima_filtrada -= $request->materia_prima_en_uso;
+                $almacenFiltrado->save();
+                $entradaProduccion->save();
+                DB::commit();
+                return redirect()->route('entradas_produccion.index')->with('success', 'Entrada de producción agregada exitosamente.');
+            } else {
+                DB::rollBack();
+                return back()->with('error', 'Cantidad de materia prima insuficiente en el almacén filtrado.');
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Hubo un error al guardar la entrada de producción: ' . $e->getMessage());
         }
-    
-        // Guardar la entrada de producción
-        $entradaProduccion->save();
-    
-        return redirect()->route('entradas_produccion.index')->with('success', 'Entrada de producción agregada exitosamente');
     }
-    
-    
-    
     
 
     public function edit(EntradaProduccion $entrada)
@@ -74,34 +72,40 @@ class EntradaProduccionController extends Controller
 
     public function update(Request $request, EntradaProduccion $entrada)
     {
-        $validated = $request->validate([
+        $request->validate([
             'producto_id' => 'required|exists:productos,id',
             'almacen_filtrado_id' => 'required|exists:almacen_filtrado,id',
-            'materia_prima_en_uso' => 'required|numeric|min:0.01',
-            'cantidad_producto' => 'nullable|integer|min:0',
-            'precio_venta' => 'required|numeric|min:0',
+            'materia_prima_en_uso' => 'required|numeric|min:0',
+            'estado_produccion' => 'required|in:en proceso,finalizado',
         ]);
-    
-        // Actualizar la entrada de producción
-        $entrada->update($validated);
-    
-        // Actualizar el stock del almacen filtrado
-        $almacen = AlmacenFiltrado::findOrFail($validated['almacen_filtrado_id']);
-        $almacen->existencia_actual -= $validated['materia_prima_en_uso'];
+
+        $almacen = AlmacenFiltrado::findOrFail($entrada->almacen_filtrado_id);
+        $almacen->cantidad_materia_prima_filtrada += $entrada->materia_prima_en_uso;
+
+        if ($almacen->cantidad_materia_prima_filtrada >= $request->materia_prima_en_uso) {
+            $almacen->cantidad_materia_prima_filtrada -= $request->materia_prima_en_uso;
+        } else {
+            return back()->with('error', 'Cantidad insuficiente en el almacén filtrado.');
+        }
+
         $almacen->save();
-    
+
+        $entrada->update([
+            'producto_id' => $request->producto_id,
+            'almacen_filtrado_id' => $request->almacen_filtrado_id,
+            'materia_prima_en_uso' => $request->materia_prima_en_uso,
+            'estado_produccion' => $request->estado_produccion,
+        ]);
+
         return redirect()->route('entradas_produccion.index')->with('success', 'Entrada actualizada con éxito.');
     }
-    
 
     public function destroy(EntradaProduccion $entrada)
     {
-        // Restaurar el stock del almacen filtrado antes de eliminar
         $almacen = AlmacenFiltrado::findOrFail($entrada->almacen_filtrado_id);
-        $almacen->existencia_actual += $entrada->materia_prima_en_uso;
+        $almacen->cantidad_materia_prima_filtrada += $entrada->materia_prima_en_uso;
         $almacen->save();
 
-        // Eliminar la entrada de producción
         $entrada->delete();
 
         return redirect()->route('entradas_produccion.index')->with('success', 'Entrada eliminada con éxito.');

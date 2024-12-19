@@ -29,6 +29,7 @@ Route::resource('clientes', ClienteController::class);
 Route::resource('usuarios', UsuarioController::class);
 Route::resource('roles', RolController::class);
 Route::resource('control_entrada_materia_prima', ControlEntradaMateriaPrimaController::class);
+Route::post('entradas_produccion/{id}/finalizar', [EntradaProduccionController::class, 'finalizar'])->name('entradas_produccion.finalizar');
 
 
 

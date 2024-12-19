@@ -16,8 +16,7 @@ return new class extends Migration
             $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');
             $table->foreignId('almacen_filtrado_id')->constrained('almacen_filtrado')->onDelete('cascade');
             $table->integer('materia_prima_en_uso'); // Cantidad utilizada
-            $table->integer('cantidad_producto')->default(0); // Siempre habilitado con valor por defecto 0
-            $table->decimal('precio_venta', 10, 2);
+            $table->string('estado_produccion')->default('en proceso'); // Nuevo campo
             $table->timestamp('fecha_entrada')->useCurrent();
             $table->timestamps();
         });

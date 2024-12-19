@@ -15,8 +15,7 @@ class EntradaProduccion extends Model
         'producto_id',
         'almacen_filtrado_id',
         'materia_prima_en_uso',
-        'cantidad_producto',
-        'precio_venta',
+        'estado_produccion',
         'fecha_entrada',
     ];
 
