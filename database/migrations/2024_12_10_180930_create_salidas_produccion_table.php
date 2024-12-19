@@ -9,25 +9,23 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        Schema::create('salidas', function (Blueprint $table) {
+        Schema::create('salidas_produccion', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');
+            $table->foreignId('entrada_produccion_id')->constrained('entradas_produccion')->onDelete('cascade');
             $table->integer('cantidad');
-            $table->text('descripcion')->nullable(); // Ejemplo: "Para mate filtrado"
-            $table->date('fecha_salida');
-            $table->string('supervisor')->nullable(); // Responsable
+            $table->timestamp('fecha_hora_salida')->useCurrent();
             $table->timestamps();
         });
-        
     }
+    
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('salidas');
+        Schema::dropIfExists('salidas_produccion');
     }
 };
