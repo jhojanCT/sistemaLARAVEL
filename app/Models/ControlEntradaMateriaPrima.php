@@ -12,7 +12,7 @@ class ControlEntradaMateriaPrima extends Model
     protected $table = 'control_entrada_materia_prima';
     protected $fillable = [
         'proveedor_id',
-        'materia_prima',
+        'materia_prima_id',
         'cantidad',
         'encargado',
         'fecha_llegada',
@@ -24,6 +24,11 @@ class ControlEntradaMateriaPrima extends Model
     {
         return $this->belongsTo(Proveedor::class);
     }
+    public function materiaPrima()
+    {
+    return $this->belongsTo(MateriaPrima::class, 'materia_prima_id');
+    }
+
 
     // Relación con el almacén sin filtro
     public function almacenSinFiltro()
@@ -38,15 +43,15 @@ class ControlEntradaMateriaPrima extends Model
     {
         static::created(function ($entry) {
             // Sumar todas las cantidades para la misma materia prima del proveedor actual
-            $totalCantidad = self::where('materia_prima', $entry->materia_prima)
-                                ->where('proveedor_id', $entry->proveedor_id)
-                                ->sum('cantidad');
-
+            $totalCantidad = self::where('materia_prima_id', $entry->materia_prima_id)
+                                 ->where('proveedor_id', $entry->proveedor_id)
+                                 ->sum('cantidad');
+    
             // Crear o actualizar la entrada en la tabla almacen_sin_filtro
             \App\Models\AlmacenSinFiltro::updateOrCreate(
                 [
                     'proveedor_id' => $entry->proveedor_id,
-                    'materia_prima' => $entry->materia_prima,
+                    'materia_prima_id' => $entry->materia_prima_id,
                 ],
                 [
                     'cantidad_total' => $totalCantidad,
@@ -54,4 +59,5 @@ class ControlEntradaMateriaPrima extends Model
             );
         });
     }
+    
 }

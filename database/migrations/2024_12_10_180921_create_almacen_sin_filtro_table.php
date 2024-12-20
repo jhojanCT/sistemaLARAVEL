@@ -10,8 +10,8 @@ class CreateAlmacenSinFiltroTable extends Migration
     {
         Schema::create('almacen_sin_filtro', function (Blueprint $table) {
             $table->id();
-        $table->foreignId('proveedor_id')->constrained('proveedores')->onDelete('cascade');
-            $table->string('materia_prima');
+         $table->foreignId('proveedor_id')->constrained('proveedores')->onDelete('cascade');
+            $table->foreignId('materia_prima_id')->constrained('materias_primas')->onDelete('cascade');
             $table->decimal('cantidad_total', 8, 2)->default(0);
             $table->timestamps();
         });

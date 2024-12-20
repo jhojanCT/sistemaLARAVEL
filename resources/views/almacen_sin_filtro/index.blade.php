@@ -17,7 +17,7 @@
             <tr>
                 <td>{{ $item->id }}</td>
                 <td>{{ $item->proveedor->nombre }}</td>
-                <td>{{ $item->materia_prima }}</td>
+                <td>{{ $item->materiaPrima->nombre }}</td>
                 <td>{{ $item->cantidad_total }}</td>
             </tr>
             @endforeach

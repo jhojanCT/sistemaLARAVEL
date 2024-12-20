@@ -27,7 +27,7 @@
     @foreach($entradas as $entrada)
         <tr>
             <td>{{ $entrada->proveedor->nombre }}</td>
-            <td>{{ $entrada->almacenSinFiltro ? $entrada->almacenSinFiltro->materia_prima : 'No disponible' }}</td>
+            <td>{{ $entrada->materiaPrima->nombre }}</td>
             <td>{{ $entrada->cantidad }}</td>
             <td>{{ $entrada->encargado }}</td>
             <td>{{ $entrada->fecha_llegada }}</td>

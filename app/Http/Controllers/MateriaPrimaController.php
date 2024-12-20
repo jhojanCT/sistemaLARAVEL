@@ -22,7 +22,6 @@ class MateriaPrimaController extends Controller
     {
         $request->validate([
             'nombre' => 'required|unique:materias_primas|max:255',
-            'descripcion' => 'nullable',
         ]);
 
         MateriaPrima::create($request->all());

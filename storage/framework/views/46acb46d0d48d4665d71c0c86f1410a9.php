@@ -26,7 +26,7 @@
     <?php $__currentLoopData = $entradas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $entrada): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <tr>
             <td><?php echo e($entrada->proveedor->nombre); ?></td>
-            <td><?php echo e($entrada->almacenSinFiltro ? $entrada->almacenSinFiltro->materia_prima : 'No disponible'); ?></td>
+            <td><?php echo e($entrada->materiaPrima->nombre); ?></td>
             <td><?php echo e($entrada->cantidad); ?></td>
             <td><?php echo e($entrada->encargado); ?></td>
             <td><?php echo e($entrada->fecha_llegada); ?></td>

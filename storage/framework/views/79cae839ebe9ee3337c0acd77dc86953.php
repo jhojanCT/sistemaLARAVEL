@@ -15,7 +15,7 @@
             <tr>
                 <td><?php echo e($item->id); ?></td>
                 <td><?php echo e($item->proveedor->nombre); ?></td>
-                <td><?php echo e($item->materia_prima); ?></td>
+                <td><?php echo e($item->materiaPrima->nombre); ?></td>
                 <td><?php echo e($item->cantidad_total); ?></td>
             </tr>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

@@ -13,7 +13,7 @@ class AlmacenSinFiltro extends Model
 
     protected $fillable = [
         'proveedor_id',
-        'materia_prima',
+        'materia_prima_id',
         'cantidad_total',
     ];
 
@@ -24,6 +24,11 @@ class AlmacenSinFiltro extends Model
     {
         return $this->belongsTo(Proveedor::class);
     }
+    public function materiaPrima()
+    {
+    return $this->belongsTo(MateriaPrima::class, 'materia_prima_id');
+    }
+
 
     /**
      * Actualiza o crea el registro consolidado en AlmacenSinFiltro
@@ -32,7 +37,7 @@ class AlmacenSinFiltro extends Model
     {
         // Busca si ya existe un registro para el mismo proveedor y materia prima
         $registro = self::where('proveedor_id', $entrada->proveedor_id)
-            ->where('materia_prima', $entrada->materia_prima)
+            ->where('materia_prima_id', $entrada->materia_prima_id)
             ->first();
 
         if ($registro) {
@@ -43,7 +48,7 @@ class AlmacenSinFiltro extends Model
             // Si no existe, crea un nuevo registro
             self::create([
                 'proveedor_id' => $entrada->proveedor_id,
-                'materia_prima' => $entrada->materia_prima,
+                'materia_prima_id' => $entrada->materia_prima_id,
                 'cantidad_total' => $entrada->cantidad,
             ]);
         }
