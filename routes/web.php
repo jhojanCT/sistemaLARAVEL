@@ -13,9 +13,13 @@ use App\Http\Controllers\AlmacenSinFiltroController;
 use App\Http\Controllers\ControlEntradaMateriaPrimaController;
 use App\Http\Controllers\EntradaProduccionController;
 use App\Http\Controllers\SalidaProduccionController;
+use App\Http\Controllers\MateriaPrimaController;
+
+
 
 
 // Rutas
+Route::resource('materias_primas', MateriaPrimaController::class);
 Route::resource('productos', ProductoController::class);
 Route::resource('categorias', CategoriaController::class);
 Route::resource('proveedores', ProveedorController::class);

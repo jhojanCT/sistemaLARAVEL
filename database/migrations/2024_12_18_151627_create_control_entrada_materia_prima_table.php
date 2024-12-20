@@ -11,7 +11,7 @@ class CreateControlEntradaMateriaPrimaTable extends Migration
         Schema::create('control_entrada_materia_prima', function (Blueprint $table) {
             $table->id();
             $table->foreignId('proveedor_id')->constrained('proveedores')->onDelete('cascade');
-            $table->string('materia_prima');
+            $table->foreignId('materia_prima_id')->constrained('materias_primas')->onDelete('cascade');
             $table->decimal('cantidad', 8, 2);
             $table->string('encargado');
             $table->date('fecha_llegada');

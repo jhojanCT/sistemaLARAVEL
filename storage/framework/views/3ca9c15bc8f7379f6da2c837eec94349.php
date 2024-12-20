@@ -52,6 +52,7 @@
 
 
                     <li class="nav-item"><a class="nav-link" href="<?php echo e(route('control_entrada_materia_prima.index')); ?>">Control De Entrada</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?php echo e(route('materias_primas.index')); ?>">Materias Primas</a></li>
                 </ul>
             </div>
         </div>
