@@ -11,8 +11,8 @@ class AlmacenFiltradoController extends Controller
      */
     public function index()
     {
-        $almacenFiltrado = AlmacenFiltrado::with('proveedor')->get();
-
+        $almacenFiltrado = AlmacenFiltrado::with(['proveedor', 'materiaPrima'])->get();
         return view('almacen_filtrado.index', compact('almacenFiltrado'));
     }
+    
 }
