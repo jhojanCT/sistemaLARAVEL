@@ -8,23 +8,19 @@
         @csrf
         @method('PUT')
         <div class="form-group">
-            <label for="proveedor_id">Proveedor</label>
-            <select name="proveedor_id" id="proveedor_id" class="form-control">
-                @foreach($proveedores as $proveedor)
-                    <option value="{{ $proveedor->id }}" {{ $entrada->proveedor_id == $proveedor->id ? 'selected' : '' }}>
-                        {{ $proveedor->nombre }}
-                    </option>
-                @endforeach
-            </select>
+        <label for="proveedor_id">Proveedor</label>
+        <select name="proveedor_id" class="form-control" required>
+            @foreach($proveedores as $proveedor)
+                <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+            @endforeach
+        </select>
         </div>
 
         <div class="form-group">
-            <label for="almacen_sin_filtro_id">Materia Prima</label>
-            <select name="almacen_sin_filtro_id" id="almacen_sin_filtro_id" class="form-control">
-                @foreach($almacenes as $almacen)
-                    <option value="{{ $almacen->id }}" {{ $entrada->almacen_sin_filtro_id == $almacen->id ? 'selected' : '' }}>
-                        {{ $almacen->materia_prima }}
-                    </option>
+            <label for="materia_prima_id">Materia Prima</label>
+            <select name="materia_prima_id" class="form-control" required>
+                @foreach($materiasPrimas as $materiaPrima)
+                    <option value="{{ $materiaPrima->id }}">{{ $materiaPrima->nombre }}</option>
                 @endforeach
             </select>
         </div>

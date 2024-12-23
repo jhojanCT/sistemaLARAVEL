@@ -1,66 +1,91 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <h1>Agregar Filtro</h1>
+<div class="container">
+    <h1>Crear Filtro</h1>
+
+    <form action="{{ route('filtros.store') }}" method="POST">
+        @csrf
         
-        <form action="{{ route('filtros.store') }}" method="POST">
-            @csrf
-            <div class="form-group">
-                <label for="proveedor_id">Proveedor</label>
-                <select name="proveedor_id" id="proveedor_id" class="form-control">
-                    @foreach($proveedores as $proveedor)
-                        <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="almacen_sin_filtro_id">Almacén Sin Filtrar</label>
-                <select name="almacen_sin_filtro_id" id="almacen_sin_filtro_id" class="form-control">
-                    @foreach($almacenesSinFiltro as $almacen)
-                        <option value="{{ $almacen->id }}">{{ $almacen->materia_prima }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="cantidad_usada">Cantidad Usada</label>
-                <input type="number" name="cantidad_usada" id="cantidad_usada" class="form-control" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="desperdicio">Desperdicio</label>
-                <input type="number" name="desperdicio" id="desperdicio" class="form-control" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="existencia_filtrada">Existencia Filtrada</label>
-                <input type="number" name="existencia_filtrada" id="existencia_filtrada" class="form-control" step="0.01" required readonly>
-            </div>
-            <div class="form-group">
-                <label for="supervisor">Supervisor</label>
-                <input type="text" name="supervisor" id="supervisor" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="fecha_filtro">Fecha de Filtro</label>
-                <input type="date" name="fecha_filtro" id="fecha_filtro" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-success mt-3">Guardar</button>
-        </form>
-    </div>
+        <!-- Campo Proveedor -->
+        <div class="form-group">
+            <label for="proveedor_id">Proveedor</label>
+            <select name="proveedor_id" id="proveedor_id" class="form-control @error('proveedor_id') is-invalid @enderror">
+                <option value="">Selecciona un proveedor</option>
+                @foreach ($proveedores as $proveedor)
+                    <option value="{{ $proveedor->id }}" {{ old('proveedor_id') == $proveedor->id ? 'selected' : '' }}>
+                        {{ $proveedor->nombre }}
+                    </option>
+                @endforeach
+            </select>
+            @error('proveedor_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-    <script>
-        // Escuchar los cambios en los campos 'cantidad_usada' y 'desperdicio'
-        document.getElementById('cantidad_usada').addEventListener('input', calcularExistenciaFiltrada);
-        document.getElementById('desperdicio').addEventListener('input', calcularExistenciaFiltrada);
+        <!-- Campo Almacén sin Filtro -->
+        <div class="form-group">
+            <label for="almacen_sin_filtro_id">Almacén sin Filtro</label>
+            <select name="almacen_sin_filtro_id" id="almacen_sin_filtro_id" class="form-control @error('almacen_sin_filtro_id') is-invalid @enderror">
+                <option value="">Selecciona un almacén sin filtro</option>
+                @foreach ($almacenesSinFiltro as $almacen)
+                    <option value="{{ $almacen->id }}" {{ old('almacen_sin_filtro_id') == $almacen->id ? 'selected' : '' }}>
+                        {{ $almacen->materiaPrima->nombre }} - {{ $almacen->cantidad_total }} unidades
+                    </option>
+                @endforeach
+            </select>
+            @error('almacen_sin_filtro_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-        function calcularExistenciaFiltrada() {
-            // Obtener los valores de los campos
-            let cantidadUsada = parseFloat(document.getElementById('cantidad_usada').value) || 0;
-            let desperdicio = parseFloat(document.getElementById('desperdicio').value) || 0;
+        <!-- Campo Cantidad Usada -->
+        <div class="form-group">
+            <label for="cantidad_usada">Cantidad Usada</label>
+            <input type="number" name="cantidad_usada" id="cantidad_usada" class="form-control @error('cantidad_usada') is-invalid @enderror" value="{{ old('cantidad_usada') }}" step="0.01">
+            @error('cantidad_usada')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-            // Calcular la existencia filtrada
-            let existenciaFiltrada = cantidadUsada - desperdicio;
+        <!-- Campo Desperdicio -->
+        <div class="form-group">
+            <label for="desperdicio">Desperdicio</label>
+            <input type="number" name="desperdicio" id="desperdicio" class="form-control @error('desperdicio') is-invalid @enderror" value="{{ old('desperdicio') }}" step="0.01">
+            @error('desperdicio')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
 
-            // Mostrar el resultado en el campo 'existencia_filtrada'
-            document.getElementById('existencia_filtrada').value = existenciaFiltrada.toFixed(2);
-        }
-    </script>
+        <!-- Campo Existencia Filtrada -->
+        <div class="form-group">
+            <label for="existencia_filtrada">Existencia Filtrada</label>
+            <input type="number" name="existencia_filtrada" id="existencia_filtrada" class="form-control @error('existencia_filtrada') is-invalid @enderror" value="{{ old('existencia_filtrada') }}" step="0.01">
+            @error('existencia_filtrada')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <!-- Campo Supervisor -->
+        <div class="form-group">
+            <label for="supervisor">Supervisor</label>
+            <input type="text" name="supervisor" id="supervisor" class="form-control @error('supervisor') is-invalid @enderror" value="{{ old('supervisor') }}">
+            @error('supervisor')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <!-- Campo Fecha de Filtro -->
+        <div class="form-group">
+            <label for="fecha_filtro">Fecha del Filtro</label>
+            <input type="date" name="fecha_filtro" id="fecha_filtro" class="form-control @error('fecha_filtro') is-invalid @enderror" value="{{ old('fecha_filtro') }}">
+            @error('fecha_filtro')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <!-- Botón de Enviar -->
+        <button type="submit" class="btn btn-primary">Crear Filtro</button>
+    </form>
+</div>
 @endsection

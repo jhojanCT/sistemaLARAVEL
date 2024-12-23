@@ -50,9 +50,16 @@
 
                     <li class="nav-item"><a class="nav-link" href="{{ route('filtros.index') }}">Filtros</a></li>
 
-
-                    <li class="nav-item"><a class="nav-link" href="{{ route('control_entrada_materia_prima.index') }}">Control De Entrada</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('materias_primas.index') }}">Materias Primas</a></li>
+                    <!-- Menú desplegable de Entradas -->
+                        <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Entradas
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('control_entrada_materia_prima.index') }}">Control De Entrada</a></li>
+                            <li><a class="dropdown-item" href="{{ route('materias_primas.index') }}"> Materias Primas</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>

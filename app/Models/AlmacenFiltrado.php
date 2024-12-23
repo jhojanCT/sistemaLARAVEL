@@ -26,26 +26,34 @@ class AlmacenFiltrado extends Model
     }
 
     /**
+     * Relación con los filtros
+     */
+    public function filtros()
+    {
+        return $this->hasMany(Filtro::class);
+    }
+    public function materiaPrima()
+    {
+        return $this->belongsTo(MateriaPrima::class, 'materia_prima_filtrada');
+    }
+
+    /**
      * Actualiza o crea el registro consolidado en AlmacenFiltrado
      */
     public static function actualizarAlmacen($filtro)
     {
-        // Busca si ya existe un registro para el mismo proveedor y materia prima
-        $registro = self::where('proveedor_id', $filtro->proveedor_id)
-            ->where('materia_prima_filtrada', $filtro->almacenSinFiltro->materia_prima)
-            ->first();
-
-        if ($registro) {
-            // Si existe, actualiza la cantidad de materia prima filtrada
-            $registro->cantidad_materia_prima_filtrada += $filtro->existencia_filtrada;
-            $registro->save();
-        } else {
-            // Si no existe, crea un nuevo registro
-            self::create([
+        // Usar un "firstOrCreate" para simplificar la lógica de creación o actualización
+        $registro = self::updateOrCreate(
+            [
                 'proveedor_id' => $filtro->proveedor_id,
-                'materia_prima_filtrada' => $filtro->almacenSinFiltro->materia_prima,
-                'cantidad_materia_prima_filtrada' => $filtro->existencia_filtrada,
-            ]);
-        }
+                'materia_prima_filtrada' => $filtro->almacenSinFiltro->materia_prima_id,
+            ],
+            [
+                'cantidad_materia_prima_filtrada' => \DB::raw('cantidad_materia_prima_filtrada + ' . $filtro->existencia_filtrada)
+            ]
+        );
+        
+        // Si el registro ya existía, `updateOrCreate` actualizará la cantidad de materia filtrada correctamente.
+        // No es necesario el chequeo adicional si utilizamos `updateOrCreate`.
     }
 }

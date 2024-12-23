@@ -15,13 +15,16 @@ return new class extends Migration
             $table->id();
             $table->foreignId('proveedor_id')->constrained('proveedores')->onDelete('cascade');
             $table->foreignId('almacen_sin_filtro_id')->constrained('almacen_sin_filtro')->onDelete('cascade');
+            // Añadir relación con almacen_filtrado
+            $table->foreignId('almacen_filtrado_id')->constrained('almacen_filtrado')->onDelete('cascade');
             $table->decimal('cantidad_usada', 10, 2);
             $table->decimal('desperdicio', 10, 2);
             $table->decimal('existencia_filtrada', 10, 2);
             $table->string('supervisor');
             $table->date('fecha_filtro');
             $table->timestamps();
-    });
+        });
+        
         
     }
 

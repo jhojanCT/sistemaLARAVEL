@@ -22,7 +22,7 @@
                 @foreach($filtros as $filtro)
                     <tr>
                         <td>{{ $filtro->proveedor->nombre }}</td>
-                        <td>{{ $filtro->almacenSinFiltro->materia_prima }}</td>
+                        <td>{{ $filtro->almacenSinFiltro->materiaPrima->nombre }}</td>
                         <td>{{ $filtro->cantidad_usada }}</td>
                         <td>{{ $filtro->desperdicio }}</td>
                         <td>{{ $filtro->existencia_filtrada }}</td>

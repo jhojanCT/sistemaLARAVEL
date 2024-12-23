@@ -9,8 +9,6 @@ class Filtro extends Model
 {
     use HasFactory;
 
-    protected $table = 'filtros';
-
     protected $fillable = [
         'proveedor_id',
         'almacen_sin_filtro_id',
@@ -19,10 +17,11 @@ class Filtro extends Model
         'existencia_filtrada',
         'supervisor',
         'fecha_filtro',
+        'almacen_filtrado_id',
     ];
 
     /**
-     * Relación con la tabla Proveedor
+     * Relación con el proveedor.
      */
     public function proveedor()
     {
@@ -30,7 +29,7 @@ class Filtro extends Model
     }
 
     /**
-     * Relación con la tabla AlmacenSinFiltro
+     * Relación con AlmacenSinFiltro.
      */
     public function almacenSinFiltro()
     {
@@ -38,20 +37,13 @@ class Filtro extends Model
     }
 
     /**
-     * Relación con la tabla AlmacenFiltrado
+     * Relación con AlmacenFiltrado.
      */
     public function almacenFiltrado()
     {
-        return $this->hasOne(AlmacenFiltrado::class);
+        return $this->belongsTo(AlmacenFiltrado::class);
     }
 
-    /**
-     * Evento para actualizar el AlmacenFiltrado
-     */
-    protected static function booted()
-    {
-        static::created(function ($filtro) {
-            AlmacenFiltrado::actualizarAlmacen($filtro);
-        });
-    }
+    
+    
 }
