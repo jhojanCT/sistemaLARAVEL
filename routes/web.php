@@ -14,6 +14,7 @@ use App\Http\Controllers\ControlEntradaMateriaPrimaController;
 use App\Http\Controllers\EntradaProduccionController;
 use App\Http\Controllers\SalidaProduccionController;
 use App\Http\Controllers\MateriaPrimaController;
+use App\Http\Controllers\Auth\LoginController;
 
 
 
@@ -36,8 +37,11 @@ Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::c
 Route::delete('salidas_produccion/{salida}', [SalidaProduccionController::class, 'eliminar'])->name('salidas_produccion.eliminar');
 Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::class, 'aprobar'])->name('salidas_produccion.aprobar');
 
-
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [LoginController::class, 'login']);
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/', function () {
     return view('welcome');
 });
+

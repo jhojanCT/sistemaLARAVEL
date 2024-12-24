@@ -18,6 +18,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-3">
                     <li class="nav-item"><a class="nav-link" href="{{ route('categorias.index') }}">Categorías</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Inicio de sesión</a>
                     <li class="nav-item"><a class="nav-link" href="{{ route('productos.index') }}">Productos</a></li>
 
                     <li class="nav-item"><a class="nav-link" href="{{ route('clientes.index') }}">Clientes</a></li>

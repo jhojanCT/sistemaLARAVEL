@@ -5,17 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Producto;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class ProductoController extends Controller
 {
+
+    
     public function index()
     {
+       
         $productos = Producto::with('categoria')->get(); // Obtiene los productos con su categoría
         return view('productos.index', compact('productos'));
     }
 
     public function create()
     {
+
         $categorias = Categoria::all(); // Obtiene todas las categorías para el formulario
         return view('productos.create', compact('categorias'));
     }
