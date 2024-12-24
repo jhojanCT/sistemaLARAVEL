@@ -88,4 +88,21 @@
         <button type="submit" class="btn btn-primary">Crear Filtro</button>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cantidadUsada = document.getElementById('cantidad_usada');
+        const desperdicio = document.getElementById('desperdicio');
+        const existenciaFiltrada = document.getElementById('existencia_filtrada');
+
+        function calcularExistenciaFiltrada() {
+            const usada = parseFloat(cantidadUsada.value) || 0;
+            const desperd = parseFloat(desperdicio.value) || 0;
+            existenciaFiltrada.value = (usada - desperd).toFixed(2);
+        }
+
+        cantidadUsada.addEventListener('input', calcularExistenciaFiltrada);
+        desperdicio.addEventListener('input', calcularExistenciaFiltrada);
+    });
+</script>
 @endsection
