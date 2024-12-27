@@ -18,6 +18,8 @@ use App\Http\Controllers\SalidaProduccionController;
 use App\Http\Controllers\MateriaPrimaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\VentaMateriaPrimaController;
+use App\Http\Controllers\VentaProductoController;
 
 // Rutas para login
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -45,10 +47,24 @@ Route::resource('productos', ProductoController::class);
     Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::class, 'aprobar'])->name('salidas_produccion.aprobar');
     Route::delete('salidas_produccion/{salida}', [SalidaProduccionController::class, 'eliminar'])->name('salidas_produccion.eliminar');
     Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::class, 'aprobar'])->name('salidas_produccion.aprobar');
-// Rutas protegidas por autenticación
-Route::middleware('auth')->group(function () {
-    Route::resource('materias_primas', MateriaPrimaController::class);
+    Route::prefix('ventas/productos')->name('ventas.productos.')->group(function () {
+        Route::get('/', [VentaProductoController::class, 'index'])->name('index');
+        Route::get('/create', [VentaProductoController::class, 'create'])->name('create');
+        Route::post('/', [VentaProductoController::class, 'store'])->name('store');
+        Route::get('/{venta}/edit', [VentaProductoController::class, 'edit'])->name('edit');
+        Route::put('/{venta}', [VentaProductoController::class, 'update'])->name('update');
+        Route::delete('/{venta}', [VentaProductoController::class, 'destroy'])->name('destroy');
+    });
     
+    // Rutas para ventas de materia prima
+    Route::prefix('ventas/materia-prima')->name('ventas.materia_prima.')->group(function () {
+        Route::get('/', [VentaMateriaPrimaController::class, 'index'])->name('index');
+        Route::get('/create', [VentaMateriaPrimaController::class, 'create'])->name('create');
+        Route::post('/', [VentaMateriaPrimaController::class, 'store'])->name('store');
+        Route::get('/{venta}/edit', [VentaMateriaPrimaController::class, 'edit'])->name('edit');
+        Route::put('/{venta}', [VentaMateriaPrimaController::class, 'update'])->name('update');
+        Route::delete('/{venta}', [VentaMateriaPrimaController::class, 'destroy'])->name('destroy');
+    });
 });
 
 Route::get('/', function () {

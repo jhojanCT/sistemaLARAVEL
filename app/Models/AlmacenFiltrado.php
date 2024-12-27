@@ -36,6 +36,10 @@ class AlmacenFiltrado extends Model
     {
         return $this->belongsTo(MateriaPrima::class, 'materia_prima_filtrada');
     }
+    public function ventas()
+    {
+        return $this->hasMany(VentaMateriaPrima::class);
+    }
 
     /**
      * Actualiza o crea el registro consolidado en AlmacenFiltrado

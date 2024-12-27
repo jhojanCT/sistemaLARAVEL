@@ -31,4 +31,15 @@ class Producto extends Model
     {
         return $this->hasMany(Filtro::class);
     }
+
+    public function ventas()
+    {
+        return $this->hasMany(VentaProducto::class);
+    }
+    
+    public function precios()
+    {
+        return $this->hasMany(PrecioProducto::class);
+    }
+    
 }
