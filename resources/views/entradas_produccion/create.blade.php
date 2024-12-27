@@ -20,10 +20,10 @@
                 <div class="mb-3">
                     <label for="almacen_filtrado_id" class="form-label">Materia Prima en Uso</label>
                     <select id="almacen_filtrado_id" name="almacen_filtrado_id" class="form-select" required>
-                        <option value="">Selecciona Materia Prima</option>
+                        <option value="">Selecciona Materia Prima Filtrada</option>
                         @foreach ($almacenFiltrado as $almacen)
                             <option value="{{ $almacen->id }}">
-                                {{ $almacen->materia_prima_filtrada }} - {{ $almacen->cantidad_materia_prima_filtrada }} en existencia
+                                {{ $almacen->materiaPrima->nombre }} - {{ $almacen->cantidad_materia_prima_filtrada }} en existencia
                             </option>
                         @endforeach
                     </select>

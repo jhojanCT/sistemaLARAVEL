@@ -16,7 +16,9 @@ class ControlEntradaMateriaPrima extends Model
         'cantidad',
         'encargado',
         'fecha_llegada',
-        'almacen_sin_filtro_id'
+        'almacen_sin_filtro_id',
+        'precio_unitario_por_kilo',
+        'precio_total',
     ];
 
     // Relación con el proveedor
@@ -24,11 +26,12 @@ class ControlEntradaMateriaPrima extends Model
     {
         return $this->belongsTo(Proveedor::class);
     }
+
+    // Relación con la materia prima
     public function materiaPrima()
     {
-    return $this->belongsTo(MateriaPrima::class, 'materia_prima_id');
+        return $this->belongsTo(MateriaPrima::class, 'materia_prima_id');
     }
-
 
     // Relación con el almacén sin filtro
     public function almacenSinFiltro()
@@ -46,7 +49,7 @@ class ControlEntradaMateriaPrima extends Model
             $totalCantidad = self::where('materia_prima_id', $entry->materia_prima_id)
                                  ->where('proveedor_id', $entry->proveedor_id)
                                  ->sum('cantidad');
-    
+
             // Crear o actualizar la entrada en la tabla almacen_sin_filtro
             \App\Models\AlmacenSinFiltro::updateOrCreate(
                 [
@@ -57,7 +60,12 @@ class ControlEntradaMateriaPrima extends Model
                     'cantidad_total' => $totalCantidad,
                 ]
             );
+
+            // Calcular el precio total para la entrada actual
+            if ($entry->precio_unitario_por_kilo && $entry->cantidad) {
+                $entry->precio_total = $entry->precio_unitario_por_kilo * $entry->cantidad;
+                $entry->save();
+            }
         });
     }
-    
 }
