@@ -9,19 +9,38 @@
             </div>
             <div class="card-body">
                 <!-- Formulario de inicio de sesión -->
-                <form method="POST" action="{{ route('login') }}">
+                <form name="loginForm" method="POST" action="{{ route('login') }}">
                     @csrf <!-- Token de seguridad -->
                     
-                    <!-- Campo para el nombre de usuario -->
+                    <!-- Campo para el correo electrónico -->
                     <div class="mb-3">
-                        <label for="name" class="form-label">Nombre de usuario</label>
-                        <input type="text" name="name" id="name" class="form-control" required>
+                        <label for="email" class="form-label">Correo electrónico</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            id="email" 
+                            class="form-control @error('email') is-invalid @enderror" 
+                            value="{{ old('email') }}" 
+                            required>
+                        <!-- Mensaje de error para el correo -->
+                        @error('email')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Campo para la contraseña -->
                     <div class="mb-3">
                         <label for="password" class="form-label">Contraseña</label>
-                        <input type="password" name="password" id="password" class="form-control" required>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            id="password" 
+                            class="form-control @error('password') is-invalid @enderror" 
+                            required>
+                        <!-- Mensaje de error para la contraseña -->
+                        @error('password')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Botón de inicio de sesión -->

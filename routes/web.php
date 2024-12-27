@@ -20,7 +20,8 @@ use App\Http\Controllers\Auth\LoginController;
 
 
 // Rutas
-Route::resource('materias_primas', MateriaPrimaController::class);
+Route::middleware(['check.user.type:0'])->group(function () {
+    Route::resource('materias_primas', MateriaPrimaController::class);
 Route::resource('productos', ProductoController::class);
 Route::resource('categorias', CategoriaController::class);
 Route::resource('proveedores', ProveedorController::class);
@@ -37,6 +38,12 @@ Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::c
 Route::delete('salidas_produccion/{salida}', [SalidaProduccionController::class, 'eliminar'])->name('salidas_produccion.eliminar');
 Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::class, 'aprobar'])->name('salidas_produccion.aprobar');
 
+
+
+
+   
+});
+
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
@@ -44,4 +51,3 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/', function () {
     return view('welcome');
 });
-

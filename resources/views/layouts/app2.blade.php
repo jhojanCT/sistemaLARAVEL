@@ -30,23 +30,49 @@
     <div class="container d-flex justify-content-center align-items-center vh-100">
         <div class="card p-4" style="max-width: 400px; width: 100%;">
             <h3 class="text-center mb-4">Iniciar sesión</h3>
+            
+            <!-- Mostrar errores si los hay -->
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <!-- Formulario de login -->
             <form action="{{ route('login') }}" method="POST">
                 @csrf
+
                 <div class="mb-3">
                     <label for="email" class="form-label">Correo electrónico</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
+                    @error('email')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
+
                 <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
                     <input type="password" class="form-control" id="password" name="password" required>
+                    @error('password')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
+
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="remember" name="remember">
                     <label class="form-check-label" for="remember">Recordarme</label>
                 </div>
+
                 <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
             </form>
+
+            <div class="mt-3 text-center">
+                <a href="#">¿Olvidaste tu contraseña?</a>
+            </div>
         </div>
     </div>
 

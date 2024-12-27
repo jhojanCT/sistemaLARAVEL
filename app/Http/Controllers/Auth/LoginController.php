@@ -10,10 +10,7 @@ use App\Models\User;
 
 class LoginController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
-    }
+    
 
     // Muestra el formulario de login
     public function showLoginForm()
@@ -22,30 +19,36 @@ class LoginController extends Controller
     }
 
     // Procesa el inicio de sesión
-    public function login(Request $request)
+    public function login(Request $request) 
     {
-        $credentials = $request->only('name', 'password');
+    // Validar los datos
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string',
+    ]);
 
-        // Busca al usuario en la base de datos
-        $user = User::where('name', $credentials['name'])->first();
+    $credentials = $request->only('email', 'password');
 
-        // Verifica las credenciales
-        if ($user && Hash::check($credentials['password'], $user->password)) {
-            Auth::guard('users')->login($user);
-            return redirect()->intended('filtros');
-        }
+    // Intentar autenticar al usuario
+    if (Auth::attempt($credentials)) {
+        // Regenerar sesión para seguridad
+        $request->session()->regenerate();
 
-        return back()->withErrors([
-            'name' => 'Las credenciales no coinciden con nuestros registros.',
-        ]);
+        // Redirigir a la ruta deseada
+        return redirect()->intended('filtros'); // Cambia 'filtros' por la ruta del dashboard o home
     }
 
+    // Si falla, redirige de vuelta con un mensaje de error
+    return back()->withErrors([
+        'email' => 'Las credenciales no coinciden con nuestros registros.',
+    ])->onlyInput('email');
+    }
+
+
     // Cierra sesión
-    public function logout(Request $request)
+    public function logout()
     {
-        Auth::guard('users')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect('/login');
+        Auth::logout();
+        return redirect()->route('login');
     }
 }
