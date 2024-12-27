@@ -13,28 +13,29 @@ class ControlEntradaMateriaPrimaController extends Controller
     // Mostrar todas las entradas de materia prima
     public function index()
     {
-        $entradas = ControlEntradaMateriaPrima::with('proveedor', 'materiaPrima')->get(); // Recupera todas las entradas con su proveedor y materia prima
+        $entradas = ControlEntradaMateriaPrima::with('proveedor', 'materiaPrima')->get();
         return view('control_entrada_materia_prima.index', compact('entradas'));
     }
 
     // Mostrar el formulario para crear una nueva entrada de materia prima
     public function create()
     {
-        $proveedores = Proveedor::all(); // Obtener los proveedores
-        $materiasPrimas = MateriaPrima::all(); // Obtener las materias primas
+        $proveedores = Proveedor::all();
+        $materiasPrimas = MateriaPrima::all();
         return view('control_entrada_materia_prima.create', compact('proveedores', 'materiasPrimas'));
     }
-    
+
     // Guardar una nueva entrada de materia prima
     public function store(Request $request)
     {
-        // Validación de los datos (puedes agregar más validaciones si es necesario)
+        // Validación de los datos
         $validated = $request->validate([
             'proveedor_id' => 'required|exists:proveedores,id',
-            'materia_prima_id' => 'required|exists:materias_primas,id', 
+            'materia_prima_id' => 'required|exists:materias_primas,id',
             'cantidad' => 'required|numeric',
             'encargado' => 'required|string',
             'fecha_llegada' => 'required|date',
+            'precio_unitario_por_kilo' => 'required|numeric|min:0',
         ]);
 
         // Crear o encontrar el almacén sin filtro
@@ -45,6 +46,9 @@ class ControlEntradaMateriaPrimaController extends Controller
             ]
         );
 
+        // Calcular el precio total
+        $precioTotal = $validated['cantidad'] * $validated['precio_unitario_por_kilo'];
+
         // Crear la entrada en ControlEntradaMateriaPrima
         $entrada = ControlEntradaMateriaPrima::create([
             'proveedor_id' => $validated['proveedor_id'],
@@ -53,6 +57,8 @@ class ControlEntradaMateriaPrimaController extends Controller
             'encargado' => $validated['encargado'],
             'fecha_llegada' => $validated['fecha_llegada'],
             'almacen_sin_filtro_id' => $almacenSinFiltro->id,
+            'precio_unitario_por_kilo' => $validated['precio_unitario_por_kilo'],
+            'precio_total' => $precioTotal,
         ]);
 
         // Actualizar la cantidad total en el AlmacenSinFiltro
@@ -68,7 +74,7 @@ class ControlEntradaMateriaPrimaController extends Controller
     {
         $entrada = ControlEntradaMateriaPrima::findOrFail($id);
         $proveedores = Proveedor::all();
-        $materiasPrimas = MateriaPrima::all(); // Obtener las materias primas para el formulario
+        $materiasPrimas = MateriaPrima::all();
         return view('control_entrada_materia_prima.edit', compact('entrada', 'proveedores', 'materiasPrimas'));
     }
 
@@ -82,16 +88,23 @@ class ControlEntradaMateriaPrimaController extends Controller
             'cantidad' => 'required|numeric',
             'encargado' => 'required|string',
             'fecha_llegada' => 'required|date',
+            'precio_unitario_por_kilo' => 'required|numeric|min:0',
         ]);
 
         // Encontrar la entrada y actualizarla
         $entrada = ControlEntradaMateriaPrima::findOrFail($id);
+
+        // Calcular el precio total actualizado
+        $precioTotal = $validated['cantidad'] * $validated['precio_unitario_por_kilo'];
+
         $entrada->update([
             'proveedor_id' => $validated['proveedor_id'],
             'materia_prima_id' => $validated['materia_prima_id'],
             'cantidad' => $validated['cantidad'],
             'encargado' => $validated['encargado'],
             'fecha_llegada' => $validated['fecha_llegada'],
+            'precio_unitario_por_kilo' => $validated['precio_unitario_por_kilo'],
+            'precio_total' => $precioTotal,
         ]);
 
         // Actualizar la tabla 'almacen_sin_filtro'
@@ -100,8 +113,7 @@ class ControlEntradaMateriaPrimaController extends Controller
                                    ->first();
 
         if ($almacen) {
-            // Si existe, actualizar la cantidad total (sumar la cantidad)
-            $almacen->cantidad_total += $validated['cantidad'];
+            $almacen->cantidad_total += $entrada->cantidad;
             $almacen->save();
         }
 

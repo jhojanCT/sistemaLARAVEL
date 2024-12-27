@@ -17,28 +17,35 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-3">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('categorias.index') }}">Categorías</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Inicio de sesión</a>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('productos.index') }}">Productos</a></li>
+                @auth
+                     <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Gestion de Productos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('categorias.index') }}"> Categorías </a></li>
+                            <li><a class="dropdown-item" href="{{ route('productos.index') }}">Productos</a></li>
+                            <li><a class="dropdown-item" href="{{ route('proveedores.index') }}">Proveedores</a></li>
+                        </ul>
+                    </li>
+
+
 
                     <li class="nav-item"><a class="nav-link" href="{{ route('clientes.index') }}">Clientes</a></li>
 
-                    <li class="nav-item"><a class="nav-link" href="{{ route('proveedores.index') }}">Proveedores</a></li>
-
-                    <!-- Menú desplegable de Procesos -->
+                    <!-- Menú desplegable de Procesos, solo si está autenticado -->
+                    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Produccion
+                            Producción
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('entradas_produccion.index') }}">Entradas de Produccion</a></li>
-                            <li><a class="dropdown-item" href="{{ route('salidas_produccion.index') }}">Salidas de Produccion</a></li>
+                            <li><a class="dropdown-item" href="{{ route('entradas_produccion.index') }}">Entradas de Producción</a></li>
+                            <li><a class="dropdown-item" href="{{ route('salidas_produccion.index') }}">Salidas de Producción</a></li>
                         </ul>
                     </li>
-                    
 
-
-                    <!-- Menú desplegable de Almacenes -->
+                    <!-- Menú desplegable de Almacenes, solo si está autenticado -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Almacenes
@@ -46,21 +53,46 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route('almacen_sin_filtro.index') }}">Almacén sin filtro</a></li>
                             <li><a class="dropdown-item" href="{{ route('almacen_filtrado.index') }}">Almacén filtrado</a></li>
+                            <li><a class="dropdown-item" href="{{ route('filtros.index') }}">Filtros</a></li>
                         </ul>
                     </li>
 
-                    <li class="nav-item"><a class="nav-link" href="{{ route('filtros.index') }}">Filtros</a></li>
 
-                    <!-- Menú desplegable de Entradas -->
-                        <li class="nav-item dropdown">
+
+                    <!-- Menú desplegable de Entradas, solo si está autenticado -->
+                    <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Entradas
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('control_entrada_materia_prima.index') }}">Control De Entrada</a></li>
-                            <li><a class="dropdown-item" href="{{ route('materias_primas.index') }}"> Materias Primas</a></li>
+                            <li><a class="dropdown-item" href="{{ route('control_entrada_materia_prima.index') }}">Control de Entrada</a></li>
+                            <li><a class="dropdown-item" href="{{ route('materias_primas.index') }}">Materias Primas</a></li>
                         </ul>
                     </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Gestion de usuarios
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('roles.index') }}"> Roles </a></li>
+                            <li><a class="dropdown-item" href="{{ route('users.index') }}"> usuarios</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Botón de Cerrar sesión -->
+                    <li class="nav-item">
+                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="nav-link btn btn-link">Cerrar sesión</button>
+                        </form>
+                    </li>
+                    @endauth
+
+                    <!-- Menú de inicio de sesión o registro para usuarios no autenticados -->
+                    @guest
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Iniciar sesión</a></li>
+                    @endguest
                 </ul>
             </div>
         </div>
