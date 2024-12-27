@@ -30,8 +30,18 @@
                     </li>
 
 
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Control de ventas
+                        </a>
+                        <ul class="dropdown-menu">
 
-                    <li class="nav-item"><a class="nav-link" href="{{ route('clientes.index') }}">Clientes</a></li>
+                            <li><a class="dropdown-item" href="{{ route('clientes.index') }}">Clientes</a></li>
+                            <li><a class="dropdown-item" href="{{ route('ventas.materia_prima.index') }}">Venta de Mteria Prima</a></li>
+                            <li><a class="dropdown-item" href="{{ route('ventas.productos.index') }}">Venta de Productos</a></li>
+
+                        </ul>
+                    </li>
 
                     <!-- Menú desplegable de Procesos, solo si está autenticado -->
                     

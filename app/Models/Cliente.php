@@ -27,6 +27,17 @@ class Cliente extends Model
         return $this->hasMany(Filtro::class);
     }
 
+    public function ventasMateriaPrima()
+    {
+        return $this->hasMany(VentaMateriaPrima::class);
+    }
+    
+    public function ventasProductos()
+    {
+        return $this->hasMany(VentaProducto::class);
+    }
+
+
     /**
      * Relación con los productos (si un cliente puede tener productos asociados).
      */
