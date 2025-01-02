@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('precio_unitario', 10, 2);
             $table->decimal('precio_total', 10, 2);
             $table->unsignedBigInteger('cliente_id')->nullable();
+            $table->unsignedBigInteger('cuenta_id'); // Agregada la columna para cuentas
             $table->timestamp('fecha_venta')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamps();
 
@@ -27,6 +28,9 @@ return new class extends Migration
 
             // Relación con la tabla clientes
             $table->foreign('cliente_id')->references('id')->on('clientes')->onDelete('set null');
+
+            // Relación con la tabla cuentas
+            $table->foreign('cuenta_id')->references('id')->on('cuentas')->onDelete('cascade');
         });
     }
 

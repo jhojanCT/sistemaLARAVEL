@@ -6,6 +6,7 @@ use App\Models\VentaMateriaPrima;
 use App\Models\AlmacenFiltrado;
 use App\Models\MateriaPrima;
 use App\Models\Cliente;
+use App\Models\Cuenta;
 use Illuminate\Http\Request;
 
 class VentaMateriaPrimaController extends Controller
@@ -15,8 +16,13 @@ class VentaMateriaPrimaController extends Controller
      */
     public function index()
     {
-        $ventas = VentaMateriaPrima::with(['materiaPrima', 'cliente'])->get();
-        return view('ventas.materia_prima.index', compact('ventas'));
+        // Obtener todas las cuentas, incluyendo la Cuenta General
+        $cuentas = Cuenta::all();
+
+        // Obtener las ventas de todas las cuentas, incluyendo "Cuenta General"
+        $ventas = VentaMateriaPrima::with(['materiaPrima', 'cliente', 'cuenta'])->get();
+
+        return view('ventas.materia_prima.index', compact('ventas', 'cuentas'));
     }
 
     /**
@@ -26,7 +32,8 @@ class VentaMateriaPrimaController extends Controller
     {
         $materiasPrimas = AlmacenFiltrado::all(); // Recuperar las materias primas filtradas
         $clientes = Cliente::all();
-        return view('ventas.materia_prima.create', compact('materiasPrimas', 'clientes'));
+        $cuentas = Cuenta::all(); // Recuperar las cuentas disponibles
+        return view('ventas.materia_prima.create', compact('materiasPrimas', 'clientes', 'cuentas'));
     }
 
     /**
@@ -40,6 +47,7 @@ class VentaMateriaPrimaController extends Controller
             'cantidad' => 'required|numeric|min:1',
             'precio_unitario' => 'required|numeric|min:0',
             'cliente_id' => 'nullable|exists:clientes,id', // Puede ser nulo
+            'cuenta_id' => 'required|exists:cuentas,id', // Debe incluirse la cuenta
         ]);
 
         // Obtener el registro de materia prima filtrada
@@ -60,6 +68,7 @@ class VentaMateriaPrimaController extends Controller
             'precio_unitario' => $request->precio_unitario,
             'precio_total' => $precioTotal,
             'cliente_id' => $request->cliente_id,
+            'cuenta_id' => $request->cuenta_id, // Asociar la venta con la cuenta
             'fecha_venta' => now(),
         ]);
 
@@ -77,7 +86,8 @@ class VentaMateriaPrimaController extends Controller
         $venta = VentaMateriaPrima::findOrFail($id);
         $materiasPrimas = AlmacenFiltrado::all(); // Recuperar las materias primas filtradas
         $clientes = Cliente::all();
-        return view('ventas.materia_prima.edit', compact('venta', 'materiasPrimas', 'clientes'));
+        $cuentas = Cuenta::all(); // Recuperar las cuentas disponibles
+        return view('ventas.materia_prima.edit', compact('venta', 'materiasPrimas', 'clientes', 'cuentas'));
     }
 
     /**
@@ -93,6 +103,7 @@ class VentaMateriaPrimaController extends Controller
             'cantidad' => 'required|numeric|min:1',
             'precio_unitario' => 'required|numeric|min:0',
             'cliente_id' => 'nullable|exists:clientes,id', // Puede ser nulo
+            'cuenta_id' => 'required|exists:cuentas,id', // Debe incluirse la cuenta
         ]);
 
         // Obtener el registro de materia prima filtrada
@@ -113,6 +124,7 @@ class VentaMateriaPrimaController extends Controller
             'precio_unitario' => $request->precio_unitario,
             'precio_total' => $precioTotal,
             'cliente_id' => $request->cliente_id,
+            'cuenta_id' => $request->cuenta_id, // Actualizar la cuenta asociada
         ]);
 
         // Actualizar el stock del almacen filtrado después de la venta

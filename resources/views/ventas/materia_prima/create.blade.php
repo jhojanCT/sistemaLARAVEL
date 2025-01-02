@@ -43,6 +43,15 @@
             </select>
         </div>
 
+        <div class="form-group">
+    <label for="cuenta_id">Cuenta</label>
+    <select name="cuenta_id" id="cuenta_id" class="form-control" required>
+        @foreach($cuentas as $cuenta)
+            <option value="{{ $cuenta->id }}">{{ $cuenta->nombre }}</option>
+        @endforeach
+    </select>
+</div>
+
         <button type="submit" class="btn btn-primary">Registrar Venta</button>
     </form>
 </div>
