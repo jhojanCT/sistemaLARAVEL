@@ -57,7 +57,7 @@
                     <option value="">Seleccione una cuenta</option>
                     @foreach($cuentas as $cuenta)
                         <option value="{{ $cuenta->id }}" {{ old('cuenta_id') == $cuenta->id ? 'selected' : '' }}>
-                            {{ $cuenta->nombre }} (Saldo: ${{ $cuenta->saldo }})
+                            {{ $cuenta->nombre }} (Saldo: Bs{{ $cuenta->saldo }})
                         </option>
                     @endforeach
                 </select>

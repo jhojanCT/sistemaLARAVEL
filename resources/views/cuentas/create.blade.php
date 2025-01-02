@@ -2,18 +2,18 @@
 
 @section('content')
 <div class="container">
-    <h1>Nueva Cuenta</h1>
+    <h1>Añadir Nueva Cuenta</h1>
     <form action="{{ route('cuentas.store') }}" method="POST">
         @csrf
         <div class="form-group">
-            <label for="nombre">Nombre</label>
-            <input type="text" name="nombre" id="nombre" class="form-control" required>
+            <label for="nombre">Nombre de la Cuenta</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required>
         </div>
         <div class="form-group">
             <label for="saldo">Saldo Inicial</label>
-            <input type="number" name="saldo" id="saldo" class="form-control">
+            <input type="number" step="0.01" class="form-control" id="saldo" name="saldo">
         </div>
-        <button type="submit" class="btn btn-primary mt-3">Guardar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
     </form>
 </div>
 @endsection

@@ -6,6 +6,7 @@
 
     @if($cuenta->nombre == 'Cuenta General')
         <h2>Ventas de Materia Prima (Todas las Cuentas)</h2>
+        
         <table class="table">
             <thead>
                 <tr>
@@ -22,14 +23,15 @@
                 <tr>
                     <td>{{ $venta->materiaPrima->nombre }}</td>
                     <td>{{ $venta->cantidad }}</td>
-                    <td>{{ number_format($venta->precio_unitario, 2) }}</td>
-                    <td>{{ number_format($venta->precio_total, 2) }}</td>
+                    <td>Bs{{ number_format($venta->precio_unitario, 2) }}</td>
+                    <td>Bs{{ number_format($venta->precio_total, 2) }}</td>
                     <td>{{ $venta->cliente ? $venta->cliente->nombre : 'N/A' }}</td>
                     <td>{{ $venta->fecha_venta }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        <p><strong>Total Ventas de Materia Prima:</strong> Bs{{ number_format($ventasMateriaPrima->sum('precio_total'), 2) }}</p>
 
         <h2>Ventas de Productos (Todas las Cuentas)</h2>
         <table class="table">
@@ -48,14 +50,15 @@
                 <tr>
                     <td>{{ $venta->Producto->nombre }}</td>
                     <td>{{ $venta->cantidad }}</td>
-                    <td>{{ number_format($venta->precio_unitario, 2) }}</td>
-                    <td>{{ number_format($venta->precio_total, 2) }}</td>
+                    <td>Bs{{ number_format($venta->precio_unitario, 2) }}</td>
+                    <td>Bs{{ number_format($venta->precio_total, 2) }}</td>
                     <td>{{ $venta->cliente ? $venta->cliente->nombre : 'N/A' }}</td>
                     <td>{{ $venta->fecha_venta }}</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        <p><strong>Total Ventas de Productos:</strong> Bs{{ number_format($ventasProducto->sum('precio_total'), 2) }}</p>
     @else
         @if($ventasMateriaPrima->isEmpty() && $ventasProducto->isEmpty())
             <div class="alert alert-info">
@@ -80,18 +83,15 @@
                         <tr>
                             <td>{{ $venta->materiaPrima->nombre }}</td>
                             <td>{{ $venta->cantidad }}</td>
-                            <td>{{ number_format($venta->precio_unitario, 2) }}</td>
-                            <td>{{ number_format($venta->precio_total, 2) }}</td>
+                            <td>Bs{{ number_format($venta->precio_unitario, 2) }}</td>
+                            <td>Bs{{ number_format($venta->precio_total, 2) }}</td>
                             <td>{{ $venta->cliente ? $venta->cliente->nombre : 'N/A' }}</td>
                             <td>{{ $venta->fecha_venta }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-            @else
-                <div class="alert alert-info">
-                    No hay ventas de materia prima para esta cuenta.
-                </div>
+                <p><strong>Total Ventas de Materia Prima:</strong> Bs{{ number_format($ventasMateriaPrima->sum('precio_total'), 2) }}</p>
             @endif
 
             @if($ventasProducto->isNotEmpty())
@@ -112,18 +112,15 @@
                         <tr>
                             <td>{{ $venta->Producto->nombre }}</td>
                             <td>{{ $venta->cantidad }}</td>
-                            <td>{{ number_format($venta->precio_unitario, 2) }}</td>
-                            <td>{{ number_format($venta->precio_total, 2) }}</td>
+                            <td>Bs{{ number_format($venta->precio_unitario, 2) }}</td>
+                            <td>Bs{{ number_format($venta->precio_total, 2) }}</td>
                             <td>{{ $venta->cliente ? $venta->cliente->nombre : 'N/A' }}</td>
                             <td>{{ $venta->fecha_venta }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-            @else
-                <div class="alert alert-info">
-                    No hay ventas de productos para esta cuenta.
-                </div>
+                <p><strong>Total Ventas de Productos:</strong> Bs{{ number_format($ventasProducto->sum('precio_total'), 2) }}</p>
             @endif
         @endif
     @endif

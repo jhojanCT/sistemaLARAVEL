@@ -55,7 +55,7 @@
                 <select name="cuenta_id" id="cuenta_id" class="form-control" required>
                     @foreach($cuentas as $cuenta)
                         <option value="{{ $cuenta->id }}" {{ $venta->cuenta_id == $cuenta->id ? 'selected' : '' }}>
-                            {{ $cuenta->nombre }} (Saldo: ${{ $cuenta->saldo }})
+                            {{ $cuenta->nombre }} (Saldo: Bs{{ $cuenta->saldo }})
                         </option>
                     @endforeach
                 </select>

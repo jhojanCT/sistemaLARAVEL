@@ -35,7 +35,7 @@
                 <td><strong>Bs{{ number_format($totalSaldo, 2) }}</strong></td>
                 <td>
                     <!-- Botón de Ver detalles para la Cuenta General -->
-                    <button class="btn btn-info" disabled>Ver detalles</button>
+
                 </td>
             </tr>
         </tbody>

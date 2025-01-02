@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\VentaMateriaPrima;
 use App\Models\VentaProducto;
 use App\Models\Cuenta;
@@ -12,15 +13,12 @@ class CuentaController extends Controller
     {
         // Obtener todas las cuentas
         $cuentas = Cuenta::all();
-    
+
         // Calcular el total de los saldos de todas las cuentas
         $totalSaldo = $cuentas->sum('saldo');
-    
-        // Pasar los datos a la vista
+
         return view('cuentas.index', compact('cuentas', 'totalSaldo'));
     }
-    
-    
 
     public function create()
     {
@@ -41,25 +39,40 @@ class CuentaController extends Controller
 
         return redirect()->route('cuentas.index')->with('success', 'Cuenta creada con éxito.');
     }
+
     public function show($id)
     {
         // Obtener la cuenta específica
         $cuenta = Cuenta::findOrFail($id);
-    
-        // Obtener las ventas correspondientes a la cuenta
+
         if ($cuenta->nombre == 'Cuenta General') {
-            // Si es la cuenta general, mostrar todas las ventas de materia prima y productos
+            // Mostrar todas las ventas
             $ventasMateriaPrima = VentaMateriaPrima::all();
             $ventasProducto = VentaProducto::all();
         } else {
-            // Si es una cuenta específica, mostrar las ventas correspondientes
+            // Mostrar ventas específicas de la cuenta
             $ventasMateriaPrima = VentaMateriaPrima::where('cuenta_id', $id)->get();
             $ventasProducto = VentaProducto::where('cuenta_id', $id)->get();
         }
-    
-        return view('cuentas.show', compact('cuenta', 'ventasMateriaPrima', 'ventasProducto'));
+
+        // Calcular totales
+        $totalMateriaPrima = $ventasMateriaPrima->sum('precio_total');
+        $totalProductos = $ventasProducto->sum('precio_total');
+
+        // Calcular cantidad total
+        $cantidadMateriaPrima = $ventasMateriaPrima->sum('cantidad');
+        $cantidadProductos = $ventasProducto->sum('cantidad');
+
+        return view('cuentas.show', compact(
+            'cuenta', 
+            'ventasMateriaPrima', 
+            'ventasProducto', 
+            'totalMateriaPrima', 
+            'totalProductos',
+            'cantidadMateriaPrima',
+            'cantidadProductos'
+        ));
     }
-    
 
     public function edit(Cuenta $cuenta)
     {

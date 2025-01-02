@@ -32,7 +32,7 @@
                         <td>Bs{{ number_format($venta->precio_unitario, 2) }}</td>
                         <td>Bs{{ number_format($venta->precio_total, 2) }}</td>
                         <td>{{ $venta->cliente->nombre }}</td>
-                        <td>{{ $venta->cuenta->nombre }} (Saldo: ${{ number_format($venta->cuenta->saldo, 2) }})</td>
+                        <td>{{ $venta->cuenta->nombre }}</td>
                         <td>{{ $venta->fecha_venta }}</td>
                         <td>
                             <a href="{{ route('ventas.productos.edit', $venta->id) }}" class="btn btn-warning btn-sm">Editar</a>
