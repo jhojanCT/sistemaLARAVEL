@@ -19,7 +19,11 @@
                 <td>{{ $user->email }}</td>
                 <td>
                     <a href="{{ route('users.edit', $user) }}" class="btn btn-warning">Editar</a>
-                    <a href="{{ route('users.edit', $user) }}" class="btn btn-warning">Eliminar</a>
+                    <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
                 </td>
             </tr>
             @endforeach

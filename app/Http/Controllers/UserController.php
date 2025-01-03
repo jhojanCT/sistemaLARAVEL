@@ -49,4 +49,16 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente.');
     }
 
+    public function destroy($id)
+    {
+        // Buscar el usuario por su ID
+        $user = User::findOrFail($id);
+
+        // Eliminar el usuario
+        $user->delete();
+
+        // Redirigir con mensaje de éxito
+        return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
+    }
+
 }

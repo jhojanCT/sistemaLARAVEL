@@ -30,7 +30,7 @@ Route::post('logout', function () {
     Auth::logout(); // Cierra la sesión del usuario
     return redirect()->route('login'); // Redirige a la página de login
 })->name('logout');
-Route::resource('productos', ProductoController::class);
+Route::resource('productos', ProductoController::class);{
     Route::resource('categorias', CategoriaController::class);
     Route::resource('proveedores', ProveedorController::class);
     Route::resource('filtros', FiltroController::class);
@@ -56,15 +56,34 @@ Route::resource('productos', ProductoController::class);
         Route::delete('/{venta}', [VentaProductoController::class, 'destroy'])->name('destroy');
     });
     
-    // Rutas para ventas de materia prima
-    Route::prefix('ventas/materia-prima')->name('ventas.materia_prima.')->group(function () {
-        Route::get('/', [VentaMateriaPrimaController::class, 'index'])->name('index');
-        Route::get('/create', [VentaMateriaPrimaController::class, 'create'])->name('create');
-        Route::post('/', [VentaMateriaPrimaController::class, 'store'])->name('store');
-        Route::get('/{venta}/edit', [VentaMateriaPrimaController::class, 'edit'])->name('edit');
-        Route::put('/{venta}', [VentaMateriaPrimaController::class, 'update'])->name('update');
-        Route::delete('/{venta}', [VentaMateriaPrimaController::class, 'destroy'])->name('destroy');
-    });
+};  // Rutas para ventas de materia prima
+Route::prefix('ventas/materia-prima')->name('ventas.materia_prima.')->group(function () {
+    Route::get('/', [VentaMateriaPrimaController::class, 'index'])->name('index');
+    Route::get('/create', [VentaMateriaPrimaController::class, 'create'])->name('create');
+    Route::post('/', [VentaMateriaPrimaController::class, 'store'])->name('store');
+    Route::get('/{venta}/edit', [VentaMateriaPrimaController::class, 'edit'])->name('edit');
+    Route::put('/{venta}', [VentaMateriaPrimaController::class, 'update'])->name('update');
+    Route::delete('/{venta}', [VentaMateriaPrimaController::class, 'destroy'])->name('destroy');
+});
+
+Route::prefix('materias-primas')->name('materias_primas.')->group(function () {
+    // Ruta para mostrar la lista de materias primas
+    Route::get('/', [MateriaPrimaController::class, 'index'])->name('index');
+
+    // Ruta para mostrar el formulario de creación
+    Route::get('/create', [MateriaPrimaController::class, 'create'])->name('create');
+
+    // Ruta para almacenar una nueva materia prima
+    Route::post('/', [MateriaPrimaController::class, 'store'])->name('store');
+
+    // Ruta para mostrar el formulario de edición de una materia prima específica
+    Route::get('/{id}/edit', [MateriaPrimaController::class, 'edit'])->name('edit');
+
+    // Ruta para actualizar una materia prima
+    Route::put('/{materias_prima}', [MateriaPrimaController::class, 'update'])->name('update');
+
+    // Ruta para eliminar una materia prima
+    Route::delete('/{materiaPrima}', [MateriaPrimaController::class, 'destroy'])->name('destroy');
 });
 
 Route::get('/', function () {

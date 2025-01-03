@@ -10,11 +10,20 @@ use Illuminate\Support\Facades\Auth; // Importación de Auth
 
 class CheckUserType
 {
-    
-    public function handle(Request $request, Closure $next, $type): Response
+     /**
+     * Maneja la solicitud entrante.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  string  ...$roles  Roles permitidos
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (Auth::guard('users')->check() && Auth::guard('users')->user()->user_tipo != $type) {
-            return redirect('/login');
+        $user = Auth::user();
+
+        if (!$user || !in_array($user->role, $roles)) {
+            return redirect('/')->with('error', 'No tienes permiso para acceder a esta página.');
         }
 
         return $next($request);
