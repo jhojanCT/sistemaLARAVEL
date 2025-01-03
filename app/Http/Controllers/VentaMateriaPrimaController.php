@@ -8,6 +8,7 @@ use App\Models\MateriaPrima;
 use App\Models\Cliente;
 use App\Models\Cuenta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VentaMateriaPrimaController extends Controller
 {
@@ -33,6 +34,7 @@ class VentaMateriaPrimaController extends Controller
         $materiasPrimas = AlmacenFiltrado::all(); // Recuperar las materias primas filtradas
         $clientes = Cliente::all();
         $cuentas = Cuenta::all(); // Recuperar las cuentas disponibles
+        
         return view('ventas.materia_prima.create', compact('materiasPrimas', 'clientes', 'cuentas'));
     }
 
@@ -43,37 +45,43 @@ class VentaMateriaPrimaController extends Controller
     {
         // Validación de los datos de entrada
         $request->validate([
-            'materia_prima_filtrada_id' => 'required|exists:almacen_filtrado,id', // Usamos id de 'almacen_filtrado'
+            'materia_prima_filtrada_id' => 'required|exists:almacen_filtrado,id',
             'cantidad' => 'required|numeric|min:1',
             'precio_unitario' => 'required|numeric|min:0',
-            'cliente_id' => 'nullable|exists:clientes,id', // Puede ser nulo
-            'cuenta_id' => 'required|exists:cuentas,id', // Debe incluirse la cuenta
+            'cliente_id' => 'nullable|exists:clientes,id',
+            'cuenta_id' => 'required|exists:cuentas,id',
         ]);
 
-        // Obtener el registro de materia prima filtrada
-        $almacenFiltrado = AlmacenFiltrado::findOrFail($request->materia_prima_filtrada_id);
+        DB::transaction(function () use ($request) {
+            // Obtener el registro de materia prima filtrada
+            $almacenFiltrado = AlmacenFiltrado::findOrFail($request->materia_prima_filtrada_id);
 
-        // Verificar si hay suficiente stock disponible en el almacen filtrado
-        if ($almacenFiltrado->cantidad_materia_prima_filtrada < $request->cantidad) {
-            return back()->with('error', 'No hay suficiente stock disponible.');
-        }
+            // Verificar si hay suficiente stock disponible
+            if ($almacenFiltrado->cantidad_materia_prima_filtrada < $request->cantidad) {
+                throw new \Exception('No hay suficiente stock disponible.');
+            }
 
-        // Calcular el precio total
-        $precioTotal = $request->cantidad * $request->precio_unitario;
+            // Calcular el precio total
+            $precioTotal = $request->cantidad * $request->precio_unitario;
 
-        // Crear la venta
-        $venta = VentaMateriaPrima::create([
-            'materia_prima_id' => $almacenFiltrado->materia_prima_filtrada, // Usar el campo 'materia_prima_filtrada' para referencia
-            'cantidad' => $request->cantidad,
-            'precio_unitario' => $request->precio_unitario,
-            'precio_total' => $precioTotal,
-            'cliente_id' => $request->cliente_id,
-            'cuenta_id' => $request->cuenta_id, // Asociar la venta con la cuenta
-            'fecha_venta' => now(),
-        ]);
+            // Crear la venta
+            $venta = VentaMateriaPrima::create([
+                'materia_prima_id' => $almacenFiltrado->materia_prima_filtrada,
+                'cantidad' => $request->cantidad,
+                'precio_unitario' => $request->precio_unitario,
+                'precio_total' => $precioTotal,
+                'cliente_id' => $request->cliente_id,
+                'cuenta_id' => $request->cuenta_id,
+                'fecha_venta' => now(),
+            ]);
 
-        // Actualizar el stock del almacen filtrado después de la venta
-        VentaMateriaPrima::actualizarStock($almacenFiltrado->materia_prima_filtrada, $request->cantidad);
+            // Actualizar el stock del almacen filtrado
+            $almacenFiltrado->decrement('cantidad_materia_prima_filtrada', $request->cantidad);
+
+            // Actualizar el saldo de la cuenta
+            $cuenta = Cuenta::findOrFail($request->cuenta_id);
+            $cuenta->increment('saldo', $precioTotal);
+        });
 
         return redirect()->route('ventas.materia_prima.index')->with('success', 'Venta registrada con éxito');
     }
@@ -84,9 +92,10 @@ class VentaMateriaPrimaController extends Controller
     public function edit($id)
     {
         $venta = VentaMateriaPrima::findOrFail($id);
-        $materiasPrimas = AlmacenFiltrado::all(); // Recuperar las materias primas filtradas
+        $materiasPrimas = AlmacenFiltrado::all();
         $clientes = Cliente::all();
-        $cuentas = Cuenta::all(); // Recuperar las cuentas disponibles
+        $cuentas = Cuenta::all();
+
         return view('ventas.materia_prima.edit', compact('venta', 'materiasPrimas', 'clientes', 'cuentas'));
     }
 
@@ -95,40 +104,45 @@ class VentaMateriaPrimaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $venta = VentaMateriaPrima::findOrFail($id);
-
-        // Validación de los datos de entrada
         $request->validate([
             'materia_prima_filtrada_id' => 'required|exists:almacen_filtrado,id',
             'cantidad' => 'required|numeric|min:1',
             'precio_unitario' => 'required|numeric|min:0',
-            'cliente_id' => 'nullable|exists:clientes,id', // Puede ser nulo
-            'cuenta_id' => 'required|exists:cuentas,id', // Debe incluirse la cuenta
+            'cliente_id' => 'nullable|exists:clientes,id',
+            'cuenta_id' => 'required|exists:cuentas,id',
         ]);
 
-        // Obtener el registro de materia prima filtrada
-        $almacenFiltrado = AlmacenFiltrado::findOrFail($request->materia_prima_filtrada_id);
+        DB::transaction(function () use ($request, $id) {
+            $venta = VentaMateriaPrima::findOrFail($id);
 
-        // Verificar si hay suficiente stock disponible en el almacen filtrado
-        if ($almacenFiltrado->cantidad_materia_prima_filtrada < $request->cantidad) {
-            return back()->with('error', 'No hay suficiente stock disponible.');
-        }
+            // Obtener el registro de materia prima filtrada
+            $almacenFiltrado = AlmacenFiltrado::findOrFail($request->materia_prima_filtrada_id);
 
-        // Calcular el precio total
-        $precioTotal = $request->cantidad * $request->precio_unitario;
+            // Verificar si hay suficiente stock disponible
+            if ($almacenFiltrado->cantidad_materia_prima_filtrada < $request->cantidad) {
+                throw new \Exception('No hay suficiente stock disponible.');
+            }
 
-        // Actualizar la venta
-        $venta->update([
-            'materia_prima_id' => $almacenFiltrado->materia_prima_filtrada, // Usar el campo 'materia_prima_filtrada' para referencia
-            'cantidad' => $request->cantidad,
-            'precio_unitario' => $request->precio_unitario,
-            'precio_total' => $precioTotal,
-            'cliente_id' => $request->cliente_id,
-            'cuenta_id' => $request->cuenta_id, // Actualizar la cuenta asociada
-        ]);
+            // Calcular el precio total
+            $precioTotal = $request->cantidad * $request->precio_unitario;
 
-        // Actualizar el stock del almacen filtrado después de la venta
-        VentaMateriaPrima::actualizarStock($almacenFiltrado->materia_prima_filtrada, $request->cantidad);
+            // Actualizar la venta
+            $venta->update([
+                'materia_prima_id' => $almacenFiltrado->materia_prima_filtrada,
+                'cantidad' => $request->cantidad,
+                'precio_unitario' => $request->precio_unitario,
+                'precio_total' => $precioTotal,
+                'cliente_id' => $request->cliente_id,
+                'cuenta_id' => $request->cuenta_id,
+            ]);
+
+            // Actualizar el stock del almacen filtrado
+            $almacenFiltrado->decrement('cantidad_materia_prima_filtrada', $request->cantidad);
+
+            // Actualizar el saldo de la cuenta
+            $cuenta = Cuenta::findOrFail($request->cuenta_id);
+            $cuenta->increment('saldo', $precioTotal);
+        });
 
         return redirect()->route('ventas.materia_prima.index')->with('success', 'Venta actualizada con éxito');
     }
@@ -138,21 +152,22 @@ class VentaMateriaPrimaController extends Controller
      */
     public function destroy($id)
     {
-        $venta = VentaMateriaPrima::findOrFail($id);
+        DB::transaction(function () use ($id) {
+            $venta = VentaMateriaPrima::findOrFail($id);
 
-        // Recuperar la cantidad vendida y la materia prima asociada
-        $cantidadVendida = $venta->cantidad;
-        $materiaPrimaId = $venta->materia_prima_id;
+            // Restaurar el stock en el almacen filtrado
+            $almacenFiltrado = AlmacenFiltrado::where('materia_prima_filtrada', $venta->materia_prima_id)->first();
+            if ($almacenFiltrado) {
+                $almacenFiltrado->increment('cantidad_materia_prima_filtrada', $venta->cantidad);
+            }
 
-        // Eliminar la venta
-        $venta->delete();
+            // Actualizar el saldo de la cuenta
+            $cuenta = Cuenta::findOrFail($venta->cuenta_id);
+            $cuenta->decrement('saldo', $venta->precio_total);
 
-        // Restaurar el stock en el almacen filtrado
-        $almacenFiltrado = AlmacenFiltrado::where('materia_prima_filtrada', $materiaPrimaId)->first();
-        if ($almacenFiltrado) {
-            $almacenFiltrado->cantidad_materia_prima_filtrada += $cantidadVendida;
-            $almacenFiltrado->save();
-        }
+            // Eliminar la venta
+            $venta->delete();
+        });
 
         return redirect()->route('ventas.materia_prima.index')->with('success', 'Venta eliminada con éxito');
     }
