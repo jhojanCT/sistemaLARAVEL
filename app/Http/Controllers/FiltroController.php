@@ -77,6 +77,15 @@ class FiltroController extends Controller
         return redirect()->route('filtros.index')->with('success', 'Filtro registrado correctamente.');
     }
 
+    public function edit($id)
+    {
+        $filtro = Filtro::findOrFail($id);
+        $proveedores = Proveedor::all();
+        $almacenesSinFiltro = AlmacenSinFiltro::all();
+
+        return view('filtros.edit', compact('filtro', 'proveedores', 'almacenesSinFiltro'));
+    }
+
     /**
      * Actualizar un filtro.
      */

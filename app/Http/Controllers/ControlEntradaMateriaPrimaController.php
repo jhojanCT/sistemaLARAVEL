@@ -81,7 +81,7 @@ class ControlEntradaMateriaPrimaController extends Controller
     // Actualizar una entrada de materia prima
     public function update(Request $request, $id)
     {
-        // Validar los datos del formulario
+        // Validar los datos
         $validated = $request->validate([
             'proveedor_id' => 'required|exists:proveedores,id',
             'materia_prima_id' => 'required|exists:materias_primas,id',
@@ -90,13 +90,12 @@ class ControlEntradaMateriaPrimaController extends Controller
             'fecha_llegada' => 'required|date',
             'precio_unitario_por_kilo' => 'required|numeric|min:0',
         ]);
-
-        // Encontrar la entrada y actualizarla
+    
+        // Buscar la entrada existente
         $entrada = ControlEntradaMateriaPrima::findOrFail($id);
-
-        // Calcular el precio total actualizado
-        $precioTotal = $validated['cantidad'] * $validated['precio_unitario_por_kilo'];
-
+        $cantidadAnterior = $entrada->cantidad;
+    
+        // Actualizar la entrada
         $entrada->update([
             'proveedor_id' => $validated['proveedor_id'],
             'materia_prima_id' => $validated['materia_prima_id'],
@@ -104,20 +103,22 @@ class ControlEntradaMateriaPrimaController extends Controller
             'encargado' => $validated['encargado'],
             'fecha_llegada' => $validated['fecha_llegada'],
             'precio_unitario_por_kilo' => $validated['precio_unitario_por_kilo'],
-            'precio_total' => $precioTotal,
+            'precio_total' => $validated['cantidad'] * $validated['precio_unitario_por_kilo'],
         ]);
-
-        // Actualizar la tabla 'almacen_sin_filtro'
-        $almacen = AlmacenSinFiltro::where('proveedor_id', $validated['proveedor_id'])
-                                   ->where('materia_prima_id', $validated['materia_prima_id'])
+    
+        // Buscar el registro en el almacén
+        $almacen = AlmacenSinFiltro::where('proveedor_id', $entrada->proveedor_id)
+                                   ->where('materia_prima_id', $entrada->materia_prima_id)
                                    ->first();
-
+    
         if ($almacen) {
-            $almacen->cantidad_total += $entrada->cantidad;
+            // Restar la cantidad anterior y sumar la nueva cantidad
+            $almacen->cantidad_total = $almacen->cantidad_total - $cantidadAnterior + $validated['cantidad'];
             $almacen->save();
         }
-
+    
         return redirect()->route('control_entrada_materia_prima.index')
                          ->with('success', 'Entrada de Materia Prima actualizada correctamente.');
     }
+    
 }
