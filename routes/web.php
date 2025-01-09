@@ -21,6 +21,9 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\VentaMateriaPrimaController;
 use App\Http\Controllers\VentaProductoController;
 use App\Http\Controllers\CuentaController;
+use App\Http\Controllers\PagoController;
+
+
 
 // Rutas para login
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -34,6 +37,14 @@ Route::post('logout', function () {
 
 // Rutas protegidas por autenticación
 Route::middleware('auth')->group(function () {
+
+    Route::prefix('pagos')->group(function () {
+        Route::get('/', [PagoController::class, 'index'])->name('pagos.index');
+        Route::get('/{id}/{type}', [PagoController::class, 'show'])->name('pagos.show');
+        Route::post('/{id}/{type}', [PagoController::class, 'store'])->name('pagos.store');
+    });
+    Route::post('/cuentas/{venta}/registrar-pago', [CuentaController::class, 'registrarPago'])->name('cuentas.registrarPago');
+
     Route::resource('cuentas', CuentaController::class);
     Route::resource('materias_primas', MateriaPrimaController::class);
     Route::resource('productos', ProductoController::class);
