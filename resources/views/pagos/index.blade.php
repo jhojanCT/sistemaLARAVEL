@@ -24,7 +24,7 @@
                         <td>{{ $venta->id }}</td>
                         <td>{{ $venta->cliente->nombre }}</td>
                         <td>{{ $venta->precio_total }}</td>
-                        <td>{{ $venta->pagos->sum('monto') }}</td>
+                        <td>{{ $venta->precio_total - $venta->saldo_deuda }}</td>
                         <td>{{ $venta->saldo_deuda }}</td>
                         <td><a href="{{ route('pagos.show', [$venta->id, 'materia_prima']) }}" class="btn btn-info">Ver Pagos</a></td>
                     </tr>
