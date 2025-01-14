@@ -28,8 +28,9 @@ class PagoController extends Controller
             return redirect()->route('pagos.index')->with('error', 'Venta no encontrada.');
         }
 
-        $pagos = $venta->pagos;
-        return view('pagos.show', compact('venta', 'pagos', 'type'));
+        // Mostrar pagos agrupados por cuota
+        $pagosPorCuota = $venta->pagos()->orderBy('cuota_numero')->get();
+        return view('pagos.show', compact('venta', 'pagosPorCuota', 'type'));
     }
 
     // Agregar un pago a una venta
@@ -37,6 +38,7 @@ class PagoController extends Controller
     {
         $request->validate([
             'monto' => 'required|numeric|min:0.01',
+            'cuota_numero' => 'nullable|integer|min:1', // Validar el número de cuota
         ]);
 
         $venta = $this->getVentaByType($id, $type);
@@ -50,11 +52,11 @@ class PagoController extends Controller
         }
 
         // Registrar el nuevo pago
-        $pago = new Pago();
-        $pago->monto = $request->monto;
-        $pago->venta_id = $venta->id;
-        $pago->venta_type = get_class($venta);
-        $pago->save();
+        $pago = Pago::registrarPagoUnico($venta, $request->monto, $request->cuota_numero); // Usamos el método estático para evitar pagos duplicados
+
+        if (!$pago) {
+            return redirect()->route('pagos.show', [$venta->id, $type])->with('error', 'El pago ya ha sido registrado para esta cuota.');
+        }
 
         // Actualizar saldo de la venta
         $this->updateVentaSaldo($venta);

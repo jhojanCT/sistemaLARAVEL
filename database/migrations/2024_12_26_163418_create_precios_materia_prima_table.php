@@ -15,10 +15,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('materia_prima_id');
             $table->decimal('precio_unitario', 10, 2);
-            $table->timestamp('fecha_actualizacion')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('fecha_actualizacion')->useCurrent();
             $table->timestamps();
 
-            // Relación con la tabla materias_primas
             $table->foreign('materia_prima_id')->references('id')->on('materias_primas')->onDelete('cascade');
         });
     }

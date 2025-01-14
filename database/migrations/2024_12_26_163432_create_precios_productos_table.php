@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('precios_productos', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('producto_id');
-            $table->foreign('producto_id')->references('id')->on('productos')->onDelete('cascade');
             $table->decimal('precio_unitario', 10, 2);
-            $table->timestamp('fecha_actualizacion')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('fecha_actualizacion')->useCurrent();
             $table->timestamps();
+
+            $table->foreign('producto_id')->references('id')->on('productos')->onDelete('cascade');
         });
         
     }

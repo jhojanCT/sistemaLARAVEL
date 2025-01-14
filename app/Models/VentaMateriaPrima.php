@@ -115,4 +115,19 @@ class VentaMateriaPrima extends Model
     {
         return $this->morphMany(Pago::class, 'venta');
     }
+
+    /**
+     * Realizar un pago inicial al registrar una venta a crédito.
+     */
+    public function realizarPagoInicial($monto)
+    {
+        if ($monto > $this->saldo_deuda) {
+            throw new \Exception('El monto inicial excede el saldo de deuda.');
+        }
+
+        $this->decrement('saldo_deuda', $monto);
+
+        $cuenta = Cuenta::findOrFail($this->cuenta_id);
+        $cuenta->increment('saldo', $monto);
+    }
 }

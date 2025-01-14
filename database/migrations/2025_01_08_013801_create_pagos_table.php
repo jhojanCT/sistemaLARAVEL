@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('pagos', function (Blueprint $table) {
             $table->id();
-            $table->morphs('venta'); // Crea los campos venta_id y venta_type
+            $table->morphs('venta'); // Relación polimórfica con las ventas (materia prima o productos)
             $table->decimal('monto', 10, 2);
+            $table->timestamp('fecha_pago')->nullable();
+            $table->integer('cuota_numero')->nullable(); // Número de cuota
             $table->timestamps();
         });
     }

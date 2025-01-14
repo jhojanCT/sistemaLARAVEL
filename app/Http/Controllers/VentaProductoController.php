@@ -5,185 +5,188 @@ namespace App\Http\Controllers;
 use App\Models\VentaProducto;
 use App\Models\Producto;
 use App\Models\Cliente;
-use App\Models\Cuenta;  // Importa el modelo de Cuenta
+use App\Models\Cuenta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class VentaProductoController extends Controller
 {
     public function index()
     {
-        $ventas = VentaProducto::with(['producto', 'cliente'])->get();
-        return view('ventas.productos.index', compact('ventas'));
+        $cuentas = Cuenta::all();
+        $ventas = VentaProducto::with(['producto', 'cliente', 'cuenta'])->get();
+        return view('ventas.productos.index', compact('ventas', 'cuentas'));
     }
 
     public function create()
     {
         $productos = Producto::all();
         $clientes = Cliente::all();
-        $cuentas = Cuenta::all();  // Obtiene todas las cuentas disponibles
+        $cuentas = Cuenta::all();
         return view('ventas.productos.create', compact('productos', 'clientes', 'cuentas'));
     }
 
     public function store(Request $request)
     {
-        // Validar los datos de la venta
-        $validated = $request->validate([
+        $request->validate([
             'producto_id' => 'required|exists:productos,id',
-            'cantidad' => 'required|integer|min:1',
+            'cantidad' => 'required|numeric|min:1',
             'precio_unitario' => 'required|numeric|min:0',
-            'cliente_id' => 'required|exists:clientes,id',
-            'cuenta_id' => 'required|exists:cuentas,id',  // Validar la cuenta seleccionada
+            'cliente_id' => 'nullable|exists:clientes,id',
+            'cuenta_id' => 'required|exists:cuentas,id',
+            'a_credito' => 'required|boolean',
+            'cuota_inicial' => 'nullable|numeric|min:0',
+            'saldo_deuda' => 'nullable|numeric|min:0',
         ]);
 
-        // Obtener el producto
-        $producto = Producto::find($validated['producto_id']);
-        $cuenta = Cuenta::find($validated['cuenta_id']);  // Obtener la cuenta seleccionada
+        DB::transaction(function () use ($request) {
+            $producto = Producto::findOrFail($request->producto_id);
 
-        // Verificar si hay suficiente cantidad en stock
-        if ($producto->cantidad < $validated['cantidad']) {
-            return redirect()->back()->with('error', 'No hay suficiente stock disponible para este producto.');
-        }
+            if ($producto->stock < $request->cantidad) {
+                throw new \Exception('No hay suficiente stock disponible.');
+            }
 
-        // Iniciar una transacción para realizar la venta y actualizar el stock
-        DB::beginTransaction();
+            $precioTotal = $request->cantidad * $request->precio_unitario;
+            $saldoDeuda = $request->a_credito ? ($precioTotal - $request->cuota_inicial) : 0;
 
-        try {
-            // Calcular el precio total de la venta
-            $precioTotal = $validated['cantidad'] * $validated['precio_unitario'];
-
-            // Crear la venta de producto
-            VentaProducto::create([
-                'producto_id' => $validated['producto_id'],
-                'cantidad' => $validated['cantidad'],
-                'precio_unitario' => $validated['precio_unitario'],
+            $venta = VentaProducto::create([
+                'producto_id' => $producto->id,
+                'cantidad' => $request->cantidad,
+                'precio_unitario' => $request->precio_unitario,
                 'precio_total' => $precioTotal,
-                'cliente_id' => $validated['cliente_id'],
-                'cuenta_id' => $validated['cuenta_id'],  // Asociar la cuenta con la venta
+                'cliente_id' => $request->cliente_id,
+                'cuenta_id' => $request->cuenta_id,
                 'fecha_venta' => now(),
+                'a_credito' => $request->a_credito,
+                'cuota_inicial' => $request->cuota_inicial,
+                'saldo_deuda' => $saldoDeuda,
             ]);
 
-            // Reducir la cantidad de producto en el inventario
-            $producto->cantidad -= $validated['cantidad'];
-            $producto->save();
+            if ($request->a_credito && $request->cuota_inicial > 0) {
+                $this->realizarPagoInicial($venta, $request->cuota_inicial);
+            }
 
-            // Actualizar el saldo de la cuenta
-            $cuenta->saldo += $precioTotal;  // Actualiza el saldo con el monto de la venta
-            $cuenta->save();
+            $producto->decrement('stock', $request->cantidad);
 
-            // Confirmar la transacción
-            DB::commit();
+            if (!$request->a_credito) {
+                $cuenta = Cuenta::findOrFail($request->cuenta_id);
+                $cuenta->increment('saldo', $precioTotal);
+            }
+        });
 
-            // Redirigir con mensaje de éxito
-            return redirect()->route('ventas.productos.index')->with('success', 'Venta registrada y stock actualizado con éxito.');
-        } catch (\Exception $e) {
-            // En caso de error, revertir la transacción
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Ocurrió un error al procesar la venta.');
-        }
+        return redirect()->route('ventas.productos.index')->with('success', 'Venta registrada con éxito');
     }
 
     public function edit($id)
     {
-        try {
-            $venta = VentaProducto::findOrFail($id);
-            $productos = Producto::all();
-            $clientes = Cliente::all();
-            $cuentas = Cuenta::all();  // Obtener las cuentas disponibles
-            return view('ventas.productos.edit', compact('venta', 'productos', 'clientes', 'cuentas'));
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('ventas.productos.index')->with('error', 'Venta no encontrada.');
-        }
+        $venta = VentaProducto::findOrFail($id);
+        $productos = Producto::all();
+        $clientes = Cliente::all();
+        $cuentas = Cuenta::all();
+        return view('ventas.productos.edit', compact('venta', 'productos', 'clientes', 'cuentas'));
     }
 
     public function update(Request $request, $id)
     {
-        try {
-            // Validar los datos de la actualización
-            $validated = $request->validate([
-                'producto_id' => 'required|exists:productos,id',
-                'cantidad' => 'required|integer|min:1',
-                'precio_unitario' => 'required|numeric|min:0',
-                'cliente_id' => 'required|exists:clientes,id',
-                'cuenta_id' => 'required|exists:cuentas,id',  // Validar la cuenta seleccionada
-            ]);
+        $request->validate([
+            'producto_id' => 'required|exists:productos,id',
+            'cantidad' => 'required|numeric|min:1',
+            'precio_unitario' => 'required|numeric|min:0',
+            'cliente_id' => 'nullable|exists:clientes,id',
+            'cuenta_id' => 'required|exists:cuentas,id',
+            'a_credito' => 'required|boolean',
+            'cuota_inicial' => 'nullable|numeric|min:0',
+            'saldo_deuda' => 'nullable|numeric|min:0',
+        ]);
 
-            // Obtener la venta
+        DB::transaction(function () use ($request, $id) {
             $venta = VentaProducto::findOrFail($id);
-            $producto = Producto::find($validated['producto_id']);
-            $cuenta = Cuenta::find($validated['cuenta_id']);  // Obtener la cuenta seleccionada
+            $producto = Producto::findOrFail($request->producto_id);
 
-            // Verificar si la cantidad solicitada está disponible
-            if ($producto->cantidad < $validated['cantidad']) {
-                return redirect()->back()->with('error', 'No hay suficiente stock disponible para este producto.');
+            if ($producto->stock < $request->cantidad) {
+                throw new \Exception('No hay suficiente stock disponible.');
             }
 
-            // Iniciar la transacción para actualizar la venta y el stock
-            DB::beginTransaction();
+            $precioTotal = $request->cantidad * $request->precio_unitario;
+            $saldoDeuda = $request->a_credito ? ($precioTotal - $request->cuota_inicial) : 0;
 
-            // Calcular el nuevo precio total
-            $precioTotal = $validated['cantidad'] * $validated['precio_unitario'];
-
-            // Actualizar la venta de producto
             $venta->update([
-                'producto_id' => $validated['producto_id'],
-                'cantidad' => $validated['cantidad'],
-                'precio_unitario' => $validated['precio_unitario'],
+                'producto_id' => $producto->id,
+                'cantidad' => $request->cantidad,
+                'precio_unitario' => $request->precio_unitario,
                 'precio_total' => $precioTotal,
-                'cliente_id' => $validated['cliente_id'],
-                'cuenta_id' => $validated['cuenta_id'],  // Actualizar la cuenta asociada
+                'cliente_id' => $request->cliente_id,
+                'cuenta_id' => $request->cuenta_id,
+                'a_credito' => $request->a_credito,
+                'cuota_inicial' => $request->cuota_inicial,
+                'saldo_deuda' => $saldoDeuda,
             ]);
 
-            // Actualizar la cantidad de producto en stock
-            $producto->cantidad -= $validated['cantidad'];
-            $producto->save();
+            $producto->decrement('stock', $request->cantidad);
 
-            // Actualizar el saldo de la cuenta
-            $cuenta->saldo += $precioTotal;  // Actualiza el saldo con el monto de la venta
-            $cuenta->save();
+            if (!$request->a_credito) {
+                $cuenta = Cuenta::findOrFail($request->cuenta_id);
+                $cuenta->increment('saldo', $precioTotal);
+            }
+        });
 
-            // Confirmar la transacción
-            DB::commit();
+        return redirect()->route('ventas.productos.index')->with('success', 'Venta actualizada con éxito');
+    }
 
-            // Redirigir con mensaje de éxito
-            return redirect()->route('ventas.productos.index')->with('success', 'Venta actualizada y stock actualizado con éxito.');
-        } catch (\Exception $e) {
-            // En caso de error, revertir la transacción
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Ocurrió un error al actualizar la venta.');
-        }
+    public function realizarPago(Request $request, $ventaId)
+    {
+        $request->validate([
+            'monto' => 'required|numeric|min:0.01',
+        ]);
+
+        DB::transaction(function () use ($request, $ventaId) {
+            $venta = VentaProducto::findOrFail($ventaId);
+
+            if (!$venta->a_credito) {
+                throw new \Exception('No puedes realizar pagos a una venta que no es a crédito.');
+            }
+
+            if ($request->monto > $venta->saldo_deuda) {
+                throw new \Exception('El monto excede el saldo de deuda.');
+            }
+
+            $venta->decrement('saldo_deuda', $request->monto);
+
+            $cuenta = Cuenta::findOrFail($venta->cuenta_id);
+            $cuenta->increment('saldo', $request->monto);
+        });
+
+        return redirect()->route('ventas.productos.index')->with('success', 'Pago registrado con éxito.');
     }
 
     public function destroy($id)
     {
-        try {
+        DB::transaction(function () use ($id) {
             $venta = VentaProducto::findOrFail($id);
-            $producto = $venta->producto;
-            $cuenta = $venta->cuenta;  // Obtener la cuenta asociada a la venta
+            $producto = Producto::findOrFail($venta->producto_id);
 
-            // Iniciar transacción para eliminar la venta y restaurar stock
-            DB::beginTransaction();
+            $producto->increment('stock', $venta->cantidad);
 
-            // Restaurar el stock del producto
-            $producto->cantidad += $venta->cantidad;
-            $producto->save();
+            if (!$venta->a_credito) {
+                $cuenta = Cuenta::findOrFail($venta->cuenta_id);
+                $cuenta->decrement('saldo', $venta->precio_total);
+            }
 
-            // Restaurar el saldo de la cuenta
-            $cuenta->saldo -= $venta->precio_total;  // Restar el monto de la venta del saldo
-            $cuenta->save();
-
-            // Eliminar la venta
             $venta->delete();
+        });
 
-            // Confirmar la transacción
-            DB::commit();
+        return redirect()->route('ventas.productos.index')->with('success', 'Venta eliminada con éxito');
+    }
 
-            return redirect()->route('ventas.productos.index')->with('success', 'Venta eliminada y stock restaurado con éxito.');
-        } catch (\Exception $e) {
-            // En caso de error, revertir la transacción
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Ocurrió un error al eliminar la venta.');
+    private function realizarPagoInicial($venta, $monto)
+    {
+        if ($monto > $venta->saldo_deuda) {
+            throw new \Exception('El monto inicial excede el saldo de deuda.');
         }
+
+        $venta->decrement('saldo_deuda', $monto);
+
+        $cuenta = Cuenta::findOrFail($venta->cuenta_id);
+        $cuenta->increment('saldo', $monto);
     }
 }

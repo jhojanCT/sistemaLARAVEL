@@ -55,10 +55,10 @@
 
         <div class="form-group" id="credit-info" style="display: none;">
             <label for="cuota_inicial">Cuota Inicial</label>
-            <input type="number" step="0.01" name="cuota_inicial" class="form-control">
-            
+            <input type="number" step="0.01" name="cuota_inicial" class="form-control" id="cuota_inicial">
+
             <label for="saldo_deuda">Saldo de Deuda</label>
-            <input type="number" step="0.01" name="saldo_deuda" class="form-control" readonly>
+            <input type="number" step="0.01" name="saldo_deuda" class="form-control" readonly id="saldo_deuda">
         </div>
 
         <button type="submit" class="btn btn-success">Registrar Venta</button>
@@ -68,13 +68,42 @@
 <script>
     const creditoSelect = document.querySelector('select[name="a_credito"]');
     const creditInfo = document.getElementById('credit-info');
+    const cantidadInput = document.querySelector('input[name="cantidad"]');
+    const precioUnitarioInput = document.querySelector('input[name="precio_unitario"]');
+    const cuotaInicialInput = document.querySelector('input[name="cuota_inicial"]');
+    const saldoDeudaInput = document.getElementById('saldo_deuda');
 
+    // Mostrar u ocultar la cuota inicial y saldo de deuda según la selección de crédito
     creditoSelect.addEventListener('change', function() {
         if (this.value == '1') {
             creditInfo.style.display = 'block';
         } else {
             creditInfo.style.display = 'none';
+            saldoDeudaInput.value = ""; // Resetear el saldo de deuda cuando no es a crédito
         }
     });
+
+    // Escuchar cambios en los campos que afectan el saldo de deuda
+    cantidadInput.addEventListener('input', calcularSaldoDeuda);
+    precioUnitarioInput.addEventListener('input', calcularSaldoDeuda);
+    cuotaInicialInput.addEventListener('input', calcularSaldoDeuda);
+
+    function calcularSaldoDeuda() {
+        const cantidad = parseFloat(cantidadInput.value) || 0;
+        const precioUnitario = parseFloat(precioUnitarioInput.value) || 0;
+        const cuotaInicial = parseFloat(cuotaInicialInput.value) || 0;
+        const aCredito = creditoSelect.value === '1';
+
+        const precioTotal = cantidad * precioUnitario;
+        let saldoDeuda = 0;
+
+        if (aCredito) {
+            saldoDeuda = precioTotal - cuotaInicial;
+        } else {
+            saldoDeuda = precioTotal;
+        }
+
+        saldoDeudaInput.value = saldoDeuda.toFixed(2);
+    }
 </script>
 @endsection

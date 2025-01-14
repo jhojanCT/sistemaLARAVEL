@@ -19,6 +19,9 @@ class VentaProducto extends Model
         'cliente_id',
         'cuenta_id',
         'fecha_venta',
+        'a_credito',
+        'cuota_inicial',
+        'saldo_deuda',
     ];
 
     // Relación con Producto
@@ -27,6 +30,7 @@ class VentaProducto extends Model
         return $this->belongsTo(Producto::class);
     }
 
+    // Relación con Cuenta
     public function cuenta()
     {
         return $this->belongsTo(Cuenta::class);
@@ -37,6 +41,8 @@ class VentaProducto extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
+
+    // Relación con Pagos (polimórfica)
     public function pagos()
     {
         return $this->morphMany(Pago::class, 'venta');

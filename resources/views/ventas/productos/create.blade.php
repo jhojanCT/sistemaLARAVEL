@@ -1,72 +1,67 @@
+<!-- resources/views/ventas/productos/create.blade.php -->
+
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <h2>Registrar Venta de Producto</h2>
-        <form action="{{ route('ventas.productos.store') }}" method="POST">
-            @csrf
-            <div class="form-group">
-                <label for="producto_id">Producto</label>
-                <select name="producto_id" id="producto_id" class="form-control" required>
-                    <option value="">Seleccione un producto</option>
-                    @foreach($productos as $producto)
-                        <option value="{{ $producto->id }}" {{ old('producto_id') == $producto->id ? 'selected' : '' }}>
-                            {{ $producto->nombre }} (Stock: {{ $producto->cantidad }})
-                        </option>
-                    @endforeach
-                </select>
-                @error('producto_id')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
+    <h1>Registrar Venta de Producto</h1>
 
-            <div class="form-group">
-                <label for="cantidad">Cantidad</label>
-                <input type="number" name="cantidad" id="cantidad" class="form-control" value="{{ old('cantidad') }}" required>
-                @error('cantidad')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
+    <form action="{{ route('ventas.productos.store') }}" method="POST">
+        @csrf
+        <div class="form-group">
+            <label for="producto_id">Producto</label>
+            <select name="producto_id" id="producto_id" class="form-control" required>
+                @foreach($productos as $producto)
+                    <option value="{{ $producto->id }}">{{ $producto->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label for="precio_unitario">Precio Unitario</label>
-                <input type="number" name="precio_unitario" id="precio_unitario" class="form-control" value="{{ old('precio_unitario') }}" required>
-                @error('precio_unitario')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
+        <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" name="cantidad" id="cantidad" class="form-control" required>
+        </div>
 
-            <div class="form-group">
-                <label for="cliente_id">Cliente</label>
-                <select name="cliente_id" id="cliente_id" class="form-control" required>
-                    <option value="">Seleccione un cliente</option>
-                    @foreach($clientes as $cliente)
-                        <option value="{{ $cliente->id }}" {{ old('cliente_id') == $cliente->id ? 'selected' : '' }}>
-                            {{ $cliente->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('cliente_id')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
+        <div class="form-group">
+            <label for="precio_unitario">Precio Unitario</label>
+            <input type="number" name="precio_unitario" id="precio_unitario" class="form-control" required>
+        </div>
 
-            <div class="form-group">
-                <label for="cuenta_id">Cuenta</label>
-                <select name="cuenta_id" id="cuenta_id" class="form-control" required>
-                    <option value="">Seleccione una cuenta</option>
-                    @foreach($cuentas as $cuenta)
-                        <option value="{{ $cuenta->id }}" {{ old('cuenta_id') == $cuenta->id ? 'selected' : '' }}>
-                            {{ $cuenta->nombre }} (Saldo: Bs{{ $cuenta->saldo }})
-                        </option>
-                    @endforeach
-                </select>
-                @error('cuenta_id')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
+        <div class="form-group">
+            <label for="cliente_id">Cliente</label>
+            <select name="cliente_id" id="cliente_id" class="form-control">
+                <option value="">Ninguno</option>
+                @foreach($clientes as $cliente)
+                    <option value="{{ $cliente->id }}">{{ $cliente->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
 
-            <button type="submit" class="btn btn-primary">Registrar Venta</button>
-        </form>
-    </div>
+        <div class="form-group">
+            <label for="cuenta_id">Cuenta</label>
+            <select name="cuenta_id" id="cuenta_id" class="form-control" required>
+                @foreach($cuentas as $cuenta)
+                    <option value="{{ $cuenta->id }}">{{ $cuenta->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="a_credito">¿A crédito?</label>
+            <input type="checkbox" name="a_credito" id="a_credito" class="form-control">
+        </div>
+
+        <div class="form-group" id="cuota_inicial_div" style="display:none;">
+            <label for="cuota_inicial">Cuota Inicial</label>
+            <input type="number" name="cuota_inicial" id="cuota_inicial" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registrar Venta</button>
+    </form>
+
+    <script>
+        document.getElementById('a_credito').addEventListener('change', function () {
+            document.getElementById('cuota_inicial_div').style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+    
 @endsection

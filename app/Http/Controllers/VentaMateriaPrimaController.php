@@ -64,7 +64,7 @@ class VentaMateriaPrimaController extends Controller
             ]);
 
             if ($request->a_credito && $request->cuota_inicial > 0) {
-                $venta->realizarPago($request->cuota_inicial);
+                $this->realizarPagoInicial($venta, $request->cuota_inicial);
             }
 
             $almacenFiltrado->decrement('cantidad_materia_prima_filtrada', $request->cantidad);
@@ -179,5 +179,17 @@ class VentaMateriaPrimaController extends Controller
         });
 
         return redirect()->route('ventas.materia_prima.index')->with('success', 'Venta eliminada con éxito');
+    }
+
+    private function realizarPagoInicial($venta, $monto)
+    {
+        if ($monto > $venta->saldo_deuda) {
+            throw new \Exception('El monto inicial excede el saldo de deuda.');
+        }
+
+        $venta->decrement('saldo_deuda', $monto);
+
+        $cuenta = Cuenta::findOrFail($venta->cuenta_id);
+        $cuenta->increment('saldo', $monto);
     }
 }

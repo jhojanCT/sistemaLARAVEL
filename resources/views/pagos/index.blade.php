@@ -22,10 +22,10 @@
                     @foreach($ventasMateriaPrima as $venta)
                     <tr>
                         <td>{{ $venta->id }}</td>
-                        <td>{{ $venta->cliente->nombre }}</td>
-                        <td>{{ $venta->precio_total }}</td>
-                        <td>{{ $venta->precio_total - $venta->saldo_deuda }}</td>
-                        <td>{{ $venta->saldo_deuda }}</td>
+                        <td>{{ $venta->cliente ? $venta->cliente->nombre : 'Cliente no asignado' }}</td>
+                        <td>{{ number_format($venta->precio_total, 2) }}</td>
+                        <td>{{ number_format($venta->precio_total - $venta->saldo_deuda, 2) }}</td>
+                        <td>{{ number_format($venta->saldo_deuda, 2) }}</td>
                         <td><a href="{{ route('pagos.show', [$venta->id, 'materia_prima']) }}" class="btn btn-info">Ver Pagos</a></td>
                     </tr>
                     @endforeach
@@ -50,10 +50,10 @@
                     @foreach($ventasProducto as $venta)
                     <tr>
                         <td>{{ $venta->id }}</td>
-                        <td>{{ $venta->cliente->nombre }}</td>
-                        <td>{{ $venta->precio_total }}</td>
-                        <td>{{ $venta->pagos->sum('monto') }}</td>
-                        <td>{{ $venta->saldo_deuda }}</td>
+                        <td>{{ $venta->cliente ? $venta->cliente->nombre : 'Cliente no asignado' }}</td>
+                        <td>{{ number_format($venta->precio_total, 2) }}</td>
+                        <td>{{ number_format($venta->pagos->sum('monto'), 2) }}</td>
+                        <td>{{ number_format($venta->saldo_deuda, 2) }}</td>
                         <td><a href="{{ route('pagos.show', [$venta->id, 'producto']) }}" class="btn btn-info">Ver Pagos</a></td>
                     </tr>
                     @endforeach
