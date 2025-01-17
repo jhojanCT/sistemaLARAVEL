@@ -20,8 +20,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\VentaMateriaPrimaController;
 use App\Http\Controllers\VentaProductoController;
+use App\Http\Controllers\CuentaController;
+use App\Http\Middleware\RolePermissionMiddleware;
+use App\Http\Kernel;
 
-// Rutas para login
+/// Rutas para login
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -30,7 +33,12 @@ Route::post('logout', function () {
     Auth::logout(); // Cierra la sesión del usuario
     return redirect()->route('login'); // Redirige a la página de login
 })->name('logout');
-Route::resource('productos', ProductoController::class);{
+
+// Rutas protegidas por autenticación
+Route::middleware('auth', 'role_permission')->group(function () {
+    Route::resource('cuentas', CuentaController::class);
+    Route::resource('materias_primas', MateriaPrimaController::class);
+    Route::resource('productos', ProductoController::class);
     Route::resource('categorias', CategoriaController::class);
     Route::resource('proveedores', ProveedorController::class);
     Route::resource('filtros', FiltroController::class);
@@ -40,8 +48,8 @@ Route::resource('productos', ProductoController::class);{
     Route::resource('salidas_produccion', SalidaProduccionController::class);
     Route::post('salidas_produccion/addToProducts/{id}', [SalidaProduccionController::class, 'addToProducts'])->name('salidas_produccion.addToProducts');
     Route::resource('clientes', ClienteController::class);
-    Route::resource('users', UserController::class);
-    Route::resource('roles', RoleController::class);
+    
+
     Route::resource('control_entrada_materia_prima', ControlEntradaMateriaPrimaController::class);
     Route::post('entradas_produccion/{id}/finalizar', [EntradaProduccionController::class, 'finalizar'])->name('entradas_produccion.finalizar');
     Route::put('salidas_produccion/{salida}/aprobar', [SalidaProduccionController::class, 'aprobar'])->name('salidas_produccion.aprobar');
@@ -56,7 +64,14 @@ Route::resource('productos', ProductoController::class);{
         Route::delete('/{venta}', [VentaProductoController::class, 'destroy'])->name('destroy');
     });
     
-};  // Rutas para ventas de materia prima
+}); // Rutas para ventas de materia prima
+
+
+Route::resource('users', UserController::class);
+    Route::resource('roles', RoleController::class);
+    Route::get('role/delete/{id}','RoleController@destroy');
+   Route::post('role/update/{id}','RoleController@update');
+
 Route::prefix('ventas/materia-prima')->name('ventas.materia_prima.')->group(function () {
     Route::get('/', [VentaMateriaPrimaController::class, 'index'])->name('index');
     Route::get('/create', [VentaMateriaPrimaController::class, 'create'])->name('create');
@@ -87,5 +102,5 @@ Route::prefix('materias-primas')->name('materias_primas.')->group(function () {
 });
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome'); 
 });

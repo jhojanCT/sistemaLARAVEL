@@ -17,6 +17,7 @@ class VentaProducto extends Model
         'precio_unitario',
         'precio_total',
         'cliente_id',
+        'cuenta_id',
         'fecha_venta',
     ];
 
@@ -24,6 +25,11 @@ class VentaProducto extends Model
     public function producto()
     {
         return $this->belongsTo(Producto::class);
+    }
+
+    public function cuenta()
+    {
+        return $this->belongsTo(Cuenta::class);
     }
 
     // Relación con Cliente

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -20,10 +21,11 @@ return new class extends Migration
             $table->decimal('precio_total', 10, 2);
             $table->unsignedBigInteger('cliente_id')->nullable();
             $table->foreign('cliente_id')->references('id')->on('clientes')->onDelete('set null');
+            $table->unsignedBigInteger('cuenta_id');
+            $table->foreign('cuenta_id')->references('id')->on('cuentas')->onDelete('cascade');
             $table->timestamp('fecha_venta')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamps();
         });
-        
     }
 
     /**

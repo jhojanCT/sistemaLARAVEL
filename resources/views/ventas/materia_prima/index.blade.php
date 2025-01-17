@@ -20,6 +20,7 @@
                 <th>Precio Unitario</th>
                 <th>Precio Total</th>
                 <th>Cliente</th>
+                <th>Cuentas</th>
                 <th>Fecha de Venta</th>
                 <th>Acciones</th>
             </tr>
@@ -29,9 +30,10 @@
             <tr>
                 <td>{{ $venta->materiaPrima->nombre }}</td>
                 <td>{{ $venta->cantidad }}</td>
-                <td>{{ $venta->precio_unitario }}</td>
-                <td>{{ $venta->precio_total }}</td>
+                <td>Bs{{ $venta->precio_unitario }}</td>
+                <td>Bs{{ $venta->precio_total }}</td>
                 <td>{{ $venta->cliente->nombre ?? 'Sin Cliente' }}</td>
+                <td>{{ $venta->cuenta->nombre}}</td>
                 <td>{{ $venta->fecha_venta }}</td>
                 <td>
                     <a href="{{ route('ventas.materia_prima.edit', $venta->id) }}" class="btn btn-warning btn-sm">Editar</a>

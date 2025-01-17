@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\VentaProducto;
 use App\Models\Producto;
 use App\Models\Cliente;
+use App\Models\Cuenta;  // Importa el modelo de Cuenta
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -21,7 +22,8 @@ class VentaProductoController extends Controller
     {
         $productos = Producto::all();
         $clientes = Cliente::all();
-        return view('ventas.productos.create', compact('productos', 'clientes'));
+        $cuentas = Cuenta::all();  // Obtiene todas las cuentas disponibles
+        return view('ventas.productos.create', compact('productos', 'clientes', 'cuentas'));
     }
 
     public function store(Request $request)
@@ -32,10 +34,12 @@ class VentaProductoController extends Controller
             'cantidad' => 'required|integer|min:1',
             'precio_unitario' => 'required|numeric|min:0',
             'cliente_id' => 'required|exists:clientes,id',
+            'cuenta_id' => 'required|exists:cuentas,id',  // Validar la cuenta seleccionada
         ]);
 
         // Obtener el producto
         $producto = Producto::find($validated['producto_id']);
+        $cuenta = Cuenta::find($validated['cuenta_id']);  // Obtener la cuenta seleccionada
 
         // Verificar si hay suficiente cantidad en stock
         if ($producto->cantidad < $validated['cantidad']) {
@@ -56,12 +60,17 @@ class VentaProductoController extends Controller
                 'precio_unitario' => $validated['precio_unitario'],
                 'precio_total' => $precioTotal,
                 'cliente_id' => $validated['cliente_id'],
+                'cuenta_id' => $validated['cuenta_id'],  // Asociar la cuenta con la venta
                 'fecha_venta' => now(),
             ]);
 
             // Reducir la cantidad de producto en el inventario
             $producto->cantidad -= $validated['cantidad'];
             $producto->save();
+
+            // Actualizar el saldo de la cuenta
+            $cuenta->saldo += $precioTotal;  // Actualiza el saldo con el monto de la venta
+            $cuenta->save();
 
             // Confirmar la transacción
             DB::commit();
@@ -81,7 +90,8 @@ class VentaProductoController extends Controller
             $venta = VentaProducto::findOrFail($id);
             $productos = Producto::all();
             $clientes = Cliente::all();
-            return view('ventas.productos.edit', compact('venta', 'productos', 'clientes'));
+            $cuentas = Cuenta::all();  // Obtener las cuentas disponibles
+            return view('ventas.productos.edit', compact('venta', 'productos', 'clientes', 'cuentas'));
         } catch (ModelNotFoundException $e) {
             return redirect()->route('ventas.productos.index')->with('error', 'Venta no encontrada.');
         }
@@ -96,11 +106,13 @@ class VentaProductoController extends Controller
                 'cantidad' => 'required|integer|min:1',
                 'precio_unitario' => 'required|numeric|min:0',
                 'cliente_id' => 'required|exists:clientes,id',
+                'cuenta_id' => 'required|exists:cuentas,id',  // Validar la cuenta seleccionada
             ]);
 
             // Obtener la venta
             $venta = VentaProducto::findOrFail($id);
             $producto = Producto::find($validated['producto_id']);
+            $cuenta = Cuenta::find($validated['cuenta_id']);  // Obtener la cuenta seleccionada
 
             // Verificar si la cantidad solicitada está disponible
             if ($producto->cantidad < $validated['cantidad']) {
@@ -120,11 +132,16 @@ class VentaProductoController extends Controller
                 'precio_unitario' => $validated['precio_unitario'],
                 'precio_total' => $precioTotal,
                 'cliente_id' => $validated['cliente_id'],
+                'cuenta_id' => $validated['cuenta_id'],  // Actualizar la cuenta asociada
             ]);
 
             // Actualizar la cantidad de producto en stock
             $producto->cantidad -= $validated['cantidad'];
             $producto->save();
+
+            // Actualizar el saldo de la cuenta
+            $cuenta->saldo += $precioTotal;  // Actualiza el saldo con el monto de la venta
+            $cuenta->save();
 
             // Confirmar la transacción
             DB::commit();
@@ -143,6 +160,7 @@ class VentaProductoController extends Controller
         try {
             $venta = VentaProducto::findOrFail($id);
             $producto = $venta->producto;
+            $cuenta = $venta->cuenta;  // Obtener la cuenta asociada a la venta
 
             // Iniciar transacción para eliminar la venta y restaurar stock
             DB::beginTransaction();
@@ -150,6 +168,10 @@ class VentaProductoController extends Controller
             // Restaurar el stock del producto
             $producto->cantidad += $venta->cantidad;
             $producto->save();
+
+            // Restaurar el saldo de la cuenta
+            $cuenta->saldo -= $venta->precio_total;  // Restar el monto de la venta del saldo
+            $cuenta->save();
 
             // Eliminar la venta
             $venta->delete();

@@ -17,6 +17,7 @@ class VentaMateriaPrima extends Model
         'precio_unitario',
         'precio_total',
         'cliente_id',
+        'cuenta_id',
         'fecha_venta'
     ];
 
@@ -26,6 +27,11 @@ class VentaMateriaPrima extends Model
     public function materiaPrima()
     {
         return $this->belongsTo(MateriaPrima::class, 'materia_prima_id');
+    }
+
+    public function cuenta()
+    {
+        return $this->belongsTo(Cuenta::class);
     }
 
     /**
