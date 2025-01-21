@@ -19,20 +19,20 @@ return new class extends Migration
             $table->decimal('precio_unitario', 10, 2);
             $table->decimal('precio_total', 10, 2);
             $table->unsignedBigInteger('cliente_id')->nullable();
-            $table->unsignedBigInteger('cuenta_id'); // Agregada la columna para cuentas
-            $table->timestamp('fecha_venta')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->unsignedBigInteger('cuenta_id');
+            $table->boolean('a_credito')->default(false);
+            $table->decimal('cuota_inicial', 10, 2)->nullable();
+            $table->decimal('saldo_deuda', 10, 2)->nullable();
+            $table->string('estado')->default('pendiente');
+            $table->timestamp('fecha_venta')->useCurrent();
             $table->timestamps();
 
-            // Relación con la tabla materias_primas
             $table->foreign('materia_prima_id')->references('id')->on('materias_primas')->onDelete('cascade');
-
-            // Relación con la tabla clientes
             $table->foreign('cliente_id')->references('id')->on('clientes')->onDelete('set null');
-
-            // Relación con la tabla cuentas
             $table->foreign('cuenta_id')->references('id')->on('cuentas')->onDelete('cascade');
         });
     }
+    
 
     /**
      * Reverse the migrations.

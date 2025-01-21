@@ -94,6 +94,15 @@
                         </ul>
                     </li>
 
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Creditos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('pagos.index') }}"> Credito de Ventas </a></li>
+                        </ul>
+                    </li>
+
                     <!-- Botón de Cerrar sesión -->
                     <li class="nav-item">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">

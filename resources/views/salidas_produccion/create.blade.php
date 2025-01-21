@@ -36,7 +36,7 @@
             </div>
 
             <div class="form-group">
-                <label for="precio_produccion">Precio de Producción</label>
+                <label for="precio_produccion">Costo de Producción</label>
                 <input type="number" name="precio_produccion" id="precio_produccion" class="form-control" required>
             </div>
 

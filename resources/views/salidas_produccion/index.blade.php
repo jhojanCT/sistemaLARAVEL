@@ -20,7 +20,7 @@
                     <th>Entrada de Producción</th>
                     <th>Producto</th> <!-- Nueva columna para mostrar el producto -->
                     <th>Cantidad Productos Hechos</th>
-                    <th>Precio Producción</th>
+                    <th>Costo Producción</th>
                     <th>Fecha de Salida</th>
                     <th>Acciones</th>
                 </tr>

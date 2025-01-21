@@ -1,42 +1,35 @@
-{{-- resources/views/ventas/materia_prima/create.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
 <div class="container">
-    <h1>Registrar Venta de Materia Prima</h1>
-
-    @if(session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
+    <h1>Registrar Nueva Venta de Materia Prima</h1>
 
     <form action="{{ route('ventas.materia_prima.store') }}" method="POST">
         @csrf
-        <div class="mb-3">
-            <label for="materia_prima_filtrada_id" class="form-label">Materia Prima Filtrada</label>
-            <select name="materia_prima_filtrada_id" id="materia_prima_filtrada_id" class="form-control" required>
-                <option value="">Seleccione una materia prima</option>
-                @foreach($materiasPrimas as $materia)
-                    <option value="{{ $materia->id }}">{{ $materia->materiaPrima->nombre }} - Stock: {{ $materia->cantidad_materia_prima_filtrada }}</option>
+
+        <div class="form-group">
+            <label for="materia_prima_filtrada_id">Materia Prima</label>
+            <select class="form-control" name="materia_prima_filtrada_id" required>
+                @foreach($materiasPrimas as $materiaPrima)
+                    <option value="{{ $materiaPrima->id }}">{{ $materiaPrima->materiaPrima->nombre }}</option>
                 @endforeach
             </select>
         </div>
 
-        <div class="mb-3">
-            <label for="cantidad" class="form-label">Cantidad</label>
-            <input type="number" name="cantidad" id="cantidad" class="form-control" required min="1">
+        <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" name="cantidad" class="form-control" required>
         </div>
 
-        <div class="mb-3">
-            <label for="precio_unitario" class="form-label">Precio Unitario</label>
-            <input type="number" name="precio_unitario" id="precio_unitario" class="form-control" required min="0" step="0.01">
+        <div class="form-group">
+            <label for="precio_unitario">Precio Unitario</label>
+            <input type="number" step="0.01" name="precio_unitario" class="form-control" required>
         </div>
 
-        <div class="mb-3">
-            <label for="cliente_id" class="form-label">Cliente</label>
-            <select name="cliente_id" id="cliente_id" class="form-control">
-                <option value="">Seleccione un Cliente (Opcional)</option>
+        <div class="form-group">
+            <label for="cliente_id">Cliente</label>
+            <select class="form-control" name="cliente_id">
+                <option value="">Seleccionar Cliente</option>
                 @foreach($clientes as $cliente)
                     <option value="{{ $cliente->id }}">{{ $cliente->nombre }}</option>
                 @endforeach
@@ -55,4 +48,46 @@
         <button type="submit" class="btn btn-primary">Registrar Venta</button>
     </form>
 </div>
+
+<script>
+    const creditoSelect = document.querySelector('select[name="a_credito"]');
+    const creditInfo = document.getElementById('credit-info');
+    const cantidadInput = document.querySelector('input[name="cantidad"]');
+    const precioUnitarioInput = document.querySelector('input[name="precio_unitario"]');
+    const cuotaInicialInput = document.querySelector('input[name="cuota_inicial"]');
+    const saldoDeudaInput = document.getElementById('saldo_deuda');
+
+    // Mostrar u ocultar la cuota inicial y saldo de deuda según la selección de crédito
+    creditoSelect.addEventListener('change', function() {
+        if (this.value == '1') {
+            creditInfo.style.display = 'block';
+        } else {
+            creditInfo.style.display = 'none';
+            saldoDeudaInput.value = ""; // Resetear el saldo de deuda cuando no es a crédito
+        }
+    });
+
+    // Escuchar cambios en los campos que afectan el saldo de deuda
+    cantidadInput.addEventListener('input', calcularSaldoDeuda);
+    precioUnitarioInput.addEventListener('input', calcularSaldoDeuda);
+    cuotaInicialInput.addEventListener('input', calcularSaldoDeuda);
+
+    function calcularSaldoDeuda() {
+        const cantidad = parseFloat(cantidadInput.value) || 0;
+        const precioUnitario = parseFloat(precioUnitarioInput.value) || 0;
+        const cuotaInicial = parseFloat(cuotaInicialInput.value) || 0;
+        const aCredito = creditoSelect.value === '1';
+
+        const precioTotal = cantidad * precioUnitario;
+        let saldoDeuda = 0;
+
+        if (aCredito) {
+            saldoDeuda = precioTotal - cuotaInicial;
+        } else {
+            saldoDeuda = precioTotal;
+        }
+
+        saldoDeudaInput.value = saldoDeuda.toFixed(2);
+    }
+</script>
 @endsection

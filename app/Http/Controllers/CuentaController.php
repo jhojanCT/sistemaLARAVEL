@@ -6,6 +6,7 @@ use App\Models\VentaMateriaPrima;
 use App\Models\VentaProducto;
 use App\Models\Cuenta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CuentaController extends Controller
 {
@@ -64,14 +65,43 @@ class CuentaController extends Controller
         $cantidadProductos = $ventasProducto->sum('cantidad');
 
         return view('cuentas.show', compact(
-            'cuenta', 
-            'ventasMateriaPrima', 
-            'ventasProducto', 
-            'totalMateriaPrima', 
+            'cuenta',
+            'ventasMateriaPrima',
+            'ventasProducto',
+            'totalMateriaPrima',
             'totalProductos',
             'cantidadMateriaPrima',
             'cantidadProductos'
         ));
+    }
+
+    public function registrarPago(Request $request, $ventaId)
+    {
+        $request->validate([
+            'monto' => 'required|numeric|min:0.01',
+        ]);
+
+        // Buscar la venta
+        $venta = VentaMateriaPrima::findOrFail($ventaId);
+
+        // Verificar que la venta es a crédito
+        if (!$venta->a_credito) {
+            return redirect()->back()->with('error', 'La venta no es a crédito.');
+        }
+
+        // Verificar que el monto no exceda la deuda pendiente
+        if ($request->monto > $venta->saldo_deuda) {
+            return redirect()->back()->with('error', 'El monto excede la deuda pendiente.');
+        }
+
+        // Actualizar el saldo de deuda
+        $venta->decrement('saldo_deuda', $request->monto);
+
+        // Actualizar el saldo de la cuenta asociada
+        $cuenta = $venta->cuenta;
+        $cuenta->increment('saldo', $request->monto);
+
+        return redirect()->route('cuentas.show', $cuenta->id)->with('success', 'Pago registrado con éxito.');
     }
 
     public function edit(Cuenta $cuenta)

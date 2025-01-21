@@ -1,24 +1,17 @@
-{{-- resources/views/ventas/materia_prima/index.blade.php --}}
 @extends('layouts.app')
 
 @section('content')
 <div class="container">
     <h1>Ventas de Materia Prima</h1>
-    <a href="{{ route('ventas.materia_prima.create') }}" class="btn btn-primary mb-3">Registrar Venta</a>
+    <a href="{{ route('ventas.materia_prima.create') }}" class="btn btn-primary mb-3">Nueva Venta</a>
     
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <table class="table table-bordered">
+    <table class="table">
         <thead>
             <tr>
                 <th>Materia Prima</th>
                 <th>Cantidad</th>
                 <th>Precio Unitario</th>
-                <th>Precio Total</th>
+                <th>Total</th>
                 <th>Cliente</th>
                 <th>Cuentas</th>
                 <th>Fecha de Venta</th>

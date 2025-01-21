@@ -26,6 +26,10 @@
             </tr>
         </thead>
         <tbody>
+        @php
+            $totalPrecio = 0; // Inicializamos la variable para el total
+        @endphp
+
         @foreach($entradas as $entrada)
             <tr>
                 <td>{{ $entrada->proveedor->nombre }}</td>
@@ -39,8 +43,17 @@
                     <a href="{{ route('control_entrada_materia_prima.edit', $entrada->id) }}" class="btn btn-warning">Editar</a>
                 </td>
             </tr>
+
+            @php
+                $totalPrecio += $entrada->precio_total; // Sumamos el precio total
+            @endphp
         @endforeach
         </tbody>
     </table>
+
+
+    <div class="alert alert-info">
+        <strong>Total Precio: </strong> Bs{{ number_format($totalPrecio, 2) }}
+    </div>
 </div>
 @endsection
