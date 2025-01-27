@@ -22,6 +22,10 @@ use App\Http\Controllers\VentaMateriaPrimaController;
 use App\Http\Controllers\VentaProductoController;
 use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\CreditoCompraController;
+
+
+
 
 
 
@@ -46,6 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/cuentas/{venta}/registrar-pago', [CuentaController::class, 'registrarPago'])->name('cuentas.registrarPago');
 
     Route::resource('cuentas', CuentaController::class);
+    Route::post('/credito_compras/{credito}/pay', [CreditoCompraController::class, 'pay'])->name('credito_compras.pay');
+    Route::resource('credito_compras', CreditoCompraController::class);
     Route::resource('materias_primas', MateriaPrimaController::class);
     Route::resource('productos', ProductoController::class);
     Route::resource('categorias', CategoriaController::class);

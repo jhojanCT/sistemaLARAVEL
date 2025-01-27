@@ -19,6 +19,7 @@ class ControlEntradaMateriaPrima extends Model
         'almacen_sin_filtro_id',
         'precio_unitario_por_kilo',
         'precio_total',
+        'compra_credito',  // Indicador de si la compra es a crédito
     ];
 
     // Relación con el proveedor
@@ -37,6 +38,12 @@ class ControlEntradaMateriaPrima extends Model
     public function almacenSinFiltro()
     {
         return $this->belongsTo(AlmacenSinFiltro::class, 'almacen_sin_filtro_id');
+    }
+
+    // Relación con CréditoCompra (uno a uno)
+    public function creditoCompra()
+    {
+        return $this->hasOne(CreditoCompra::class, 'control_entrada_id');
     }
 
     /**
@@ -65,6 +72,17 @@ class ControlEntradaMateriaPrima extends Model
             if ($entry->precio_unitario_por_kilo && $entry->cantidad) {
                 $entry->precio_total = $entry->precio_unitario_por_kilo * $entry->cantidad;
                 $entry->save();
+            }
+
+            // Si la compra es a crédito, creamos el registro en CreditoCompra
+            if ($entry->compra_credito == 1) {
+                \App\Models\CreditoCompra::create([
+                    'control_entrada_id' => $entry->id,
+                    'proveedor_id' => $entry->proveedor_id,  // Asociar con el proveedor de la entrada
+                    'monto_total' => $entry->precio_total,  // Usando el precio total calculado
+                    'monto_pagado' => 0,  // El monto pagado es 0 al principio
+                    'fecha' => now(),  // La fecha de la compra
+                ]);
             }
         });
     }

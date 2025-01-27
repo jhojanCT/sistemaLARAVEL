@@ -100,6 +100,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="<?php echo e(route('pagos.index')); ?>"> Credito de Ventas </a></li>
+                            <li><a class="dropdown-item" href="<?php echo e(route('credito_compras.index')); ?>"> Credito de Compras </a></li>
                         </ul>
                     </li>
 
