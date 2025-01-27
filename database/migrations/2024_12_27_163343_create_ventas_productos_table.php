@@ -22,6 +22,7 @@ return new class extends Migration
             $table->unsignedBigInteger('cuenta_id');
             $table->boolean('a_credito')->default(false);
             $table->decimal('saldo_deuda', 10, 2)->default(0);
+            $table->string('estado')->default('pendiente');
             $table->timestamp('fecha_venta')->useCurrent();
             $table->timestamps();
 

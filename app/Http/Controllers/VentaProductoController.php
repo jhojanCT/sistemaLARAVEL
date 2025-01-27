@@ -35,19 +35,18 @@ class VentaProductoController extends Controller
             'cliente_id' => 'nullable|exists:clientes,id',
             'cuenta_id' => 'required|exists:cuentas,id',
             'a_credito' => 'required|boolean',
-            'cuota_inicial' => 'nullable|numeric|min:0',
-            'saldo_deuda' => 'nullable|numeric|min:0',
+            'encargado' => 'required|string|max:255', // Validación para el encargado
         ]);
 
         DB::transaction(function () use ($request) {
             $producto = Producto::findOrFail($request->producto_id);
 
-            if ($producto->stock < $request->cantidad) {
-                throw new \Exception('No hay suficiente stock disponible.');
+            if ($producto->cantidad < $request->cantidad) {
+                throw new \Exception('No hay suficiente cantidad disponible.');
             }
 
             $precioTotal = $request->cantidad * $request->precio_unitario;
-            $saldoDeuda = $request->a_credito ? ($precioTotal - $request->cuota_inicial) : 0;
+            $saldoDeuda = $request->a_credito ? $precioTotal : 0;
 
             $venta = VentaProducto::create([
                 'producto_id' => $producto->id,
@@ -58,19 +57,23 @@ class VentaProductoController extends Controller
                 'cuenta_id' => $request->cuenta_id,
                 'fecha_venta' => now(),
                 'a_credito' => $request->a_credito,
-                'cuota_inicial' => $request->cuota_inicial,
                 'saldo_deuda' => $saldoDeuda,
+                'encargado' => $request->encargado, // Guardar el encargado
             ]);
 
-            if ($request->a_credito && $request->cuota_inicial > 0) {
-                $this->realizarPagoInicial($venta, $request->cuota_inicial);
-            }
-
-            $producto->decrement('stock', $request->cantidad);
+            $producto->decrement('cantidad', $request->cantidad);
 
             if (!$request->a_credito) {
                 $cuenta = Cuenta::findOrFail($request->cuenta_id);
                 $cuenta->increment('saldo', $precioTotal);
+            } else {
+                // Crear pago inicial si es a crédito
+                Pago::create([
+                    'venta_id' => $venta->id,
+                    'monto' => $saldoDeuda,
+                    'venta_type' => 'VentaProducto',
+                    'fecha_pago' => now(),
+                ]);
             }
         });
 
@@ -95,36 +98,57 @@ class VentaProductoController extends Controller
             'cliente_id' => 'nullable|exists:clientes,id',
             'cuenta_id' => 'required|exists:cuentas,id',
             'a_credito' => 'required|boolean',
-            'cuota_inicial' => 'nullable|numeric|min:0',
-            'saldo_deuda' => 'nullable|numeric|min:0',
+            'encargado' => 'required|string|max:255', // Validación para el encargado
         ]);
 
         DB::transaction(function () use ($request, $id) {
             $venta = VentaProducto::findOrFail($id);
             $producto = Producto::findOrFail($request->producto_id);
 
-            if ($producto->stock < $request->cantidad) {
-                throw new \Exception('No hay suficiente stock disponible.');
+            // Verificar si la cantidad de la venta ha cambiado
+            $cantidadAnterior = $venta->cantidad;
+            $nuevaCantidad = $request->cantidad;
+
+            // Si la cantidad ha cambiado, ajustamos el stock
+            if ($cantidadAnterior != $nuevaCantidad) {
+                // Si la nueva cantidad es mayor, restamos la diferencia del stock
+                if ($nuevaCantidad > $cantidadAnterior) {
+                    if ($producto->cantidad < ($nuevaCantidad - $cantidadAnterior)) {
+                        throw new \Exception('No hay suficiente cantidad disponible.');
+                    }
+                    $producto->decrement('cantidad', $nuevaCantidad - $cantidadAnterior);
+                }
+                // Si la nueva cantidad es menor, devolvemos la diferencia al stock
+                else {
+                    $producto->increment('cantidad', $cantidadAnterior - $nuevaCantidad);
+                }
             }
 
-            $precioTotal = $request->cantidad * $request->precio_unitario;
-            $saldoDeuda = $request->a_credito ? ($precioTotal - $request->cuota_inicial) : 0;
+            // Calcular el precio total y saldo de deuda
+            $precioTotal = $nuevaCantidad * $request->precio_unitario;
+            $saldoDeuda = $request->a_credito ? $precioTotal : 0;
 
+            // Actualizar la venta
             $venta->update([
                 'producto_id' => $producto->id,
-                'cantidad' => $request->cantidad,
+                'cantidad' => $nuevaCantidad,
                 'precio_unitario' => $request->precio_unitario,
                 'precio_total' => $precioTotal,
                 'cliente_id' => $request->cliente_id,
                 'cuenta_id' => $request->cuenta_id,
                 'a_credito' => $request->a_credito,
-                'cuota_inicial' => $request->cuota_inicial,
                 'saldo_deuda' => $saldoDeuda,
+                'encargado' => $request->encargado, // Actualizar el encargado
             ]);
 
-            $producto->decrement('stock', $request->cantidad);
-
-            if (!$request->a_credito) {
+            // Si la venta es a crédito, actualizamos el pago
+            if ($request->a_credito) {
+                Pago::updateOrCreate(
+                    ['venta_id' => $venta->id],
+                    ['monto' => $saldoDeuda, 'venta_type' => 'VentaProducto', 'fecha_pago' => now()]
+                );
+            } else {
+                // Si la venta no es a crédito, actualizamos la cuenta correspondiente
                 $cuenta = Cuenta::findOrFail($request->cuenta_id);
                 $cuenta->increment('saldo', $precioTotal);
             }
@@ -165,7 +189,7 @@ class VentaProductoController extends Controller
             $venta = VentaProducto::findOrFail($id);
             $producto = Producto::findOrFail($venta->producto_id);
 
-            $producto->increment('stock', $venta->cantidad);
+            $producto->increment('cantidad', $venta->cantidad);
 
             if (!$venta->a_credito) {
                 $cuenta = Cuenta::findOrFail($venta->cuenta_id);
@@ -176,17 +200,5 @@ class VentaProductoController extends Controller
         });
 
         return redirect()->route('ventas.productos.index')->with('success', 'Venta eliminada con éxito');
-    }
-
-    private function realizarPagoInicial($venta, $monto)
-    {
-        if ($monto > $venta->saldo_deuda) {
-            throw new \Exception('El monto inicial excede el saldo de deuda.');
-        }
-
-        $venta->decrement('saldo_deuda', $monto);
-
-        $cuenta = Cuenta::findOrFail($venta->cuenta_id);
-        $cuenta->increment('saldo', $monto);
     }
 }

@@ -1,75 +1,70 @@
 @extends('layouts.app')
 
-@section('title', 'Detalles de Pago')
-
 @section('content')
 <div class="container">
-    <h1>Detalles de la Venta - {{ $venta->cliente->nombre }}</h1>
-    <p><strong>Saldo Deuda:</strong> ${{ number_format($venta->saldo_deuda, 2) }}</p>
-    <p><strong>Estado:</strong> {{ ucfirst($venta->estado) }}</p>
+    <h1>Detalles de la Venta</h1>
 
-    <hr>
+    <table class="table table-bordered">
+        <tr>
+            <th>Tipo de Venta</th>
+            <td>{{ $type === 'producto' ? 'Producto' : 'Materia Prima' }}</td>
+        </tr>
+        <tr>
+            <th>Producto/Materia Prima</th>
+            <td>{{ $type === 'producto' ? $venta->producto->nombre : $venta->materiaPrima->nombre }}</td>
+        </tr>
+        <tr>
+            <th>Cliente</th>
+            <td>{{ $venta->cliente->nombre ?? 'Sin cliente' }}</td>
+        </tr>
+        <tr>
+            <th>Encargado</th>
+            <td>{{ $venta->encargado }}</td>
+        </tr>
+        <tr>
+            <th>Deuda Restante</th>
+            <td>Bs{{ number_format($venta->saldo_deuda, 2) }}</td>
+        </tr>
+        <tr>
+            <th>Total Pagado</th>
+            <td>Bs{{ number_format($venta->pagos->sum('monto'), 2) }}</td>
+        </tr>
+    </table>
 
-    <h3>Pagos Realizados</h3>
-    <table class="table table-striped">
+    <h2>Pagos Realizados</h2>
+    <table class="table table-bordered">
         <thead>
             <tr>
-                <th>N° de Cuota</th>
+                <th>#</th>
                 <th>Monto</th>
-                <th>Fecha de Pago</th>
-                <th>Acciones</th>
+                <th>Fecha</th>
+                <th>Cuota</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($pagosPorCuota as $pago)
-                <tr>
-                    <td>{{ $pago->cuota_numero }}</td>
-                    <td>${{ number_format($pago->monto, 2) }}</td>
-                    <td>{{ $pago->fecha_pago ? $pago->fecha_pago->format('d/m/Y') : 'Pendiente' }}</td>
-                    <td>
-                        @if($pago->fecha_pago)
-                            <span class="badge bg-success">Pago Completo</span>
-                        @else
-                            <span class="badge bg-warning">Pendiente</span>
-                        @endif
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="4">No hay pagos registrados.</td>
-                </tr>
-            @endforelse
+            @foreach ($pagosPorCuota as $pago)
+            <tr>
+                <td>{{ $pago->id }}</td>
+                <td>${{ number_format($pago->monto, 2) }}</td>
+                <td>{{ $pago->created_at->format('d/m/Y H:i') }}</td>
+                <td>{{ $pago->cuota_numero ?? 'N/A' }}</td>
+            </tr>
+            @endforeach
         </tbody>
     </table>
 
-    <hr>
-
-    <h3>Realizar un Nuevo Pago</h3>
+    <h2>Registrar Nuevo Pago</h2>
     <form action="{{ route('pagos.store', ['id' => $venta->id, 'type' => $type]) }}" method="POST">
         @csrf
-        <div class="mb-3">
-            <label for="monto" class="form-label">Monto del Pago</label>
-            <input type="number" class="form-control" name="monto" id="monto" value="{{ old('monto') }}" required min="0.01" step="0.01">
+        <div class="form-group">
+            <label for="monto">Monto</label>
+            <input type="number" name="monto" id="monto" step="0.01" class="form-control" required>
         </div>
-        
-        <div class="mb-3">
-            <label for="cuota_numero" class="form-label">Número de Cuota</label>
-            <input type="number" class="form-control" name="cuota_numero" id="cuota_numero" value="{{ old('cuota_numero') }}" required min="1">
+        <div class="form-group">
+            <label for="cuota_numero">Número de Cuota (opcional)</label>
+            <input type="number" name="cuota_numero" id="cuota_numero" class="form-control">
         </div>
-
         <button type="submit" class="btn btn-success">Registrar Pago</button>
     </form>
-
-    @if(session('error'))
-        <div class="alert alert-danger mt-4">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    @if(session('success'))
-        <div class="alert alert-success mt-4">
-            {{ session('success') }}
-        </div>
-    @endif
 </div>
 @endsection

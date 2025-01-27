@@ -2,108 +2,57 @@
 
 @section('content')
 <div class="container">
-    <h1>Registrar Nueva Venta de Materia Prima</h1>
-
+    <h1>Registrar Venta de Materia Prima</h1>
     <form action="{{ route('ventas.materia_prima.store') }}" method="POST">
         @csrf
-
-        <div class="form-group">
-            <label for="materia_prima_filtrada_id">Materia Prima</label>
-            <select class="form-control" name="materia_prima_filtrada_id" required>
+        <div class="mb-3">
+            <label for="materia_prima_filtrada_id" class="form-label">Materia Prima</label>
+            <select class="form-control" id="materia_prima_filtrada_id" name="materia_prima_filtrada_id" required>
+                <option value="" disabled selected>Seleccione una materia prima</option>
                 @foreach($materiasPrimas as $materiaPrima)
-                    <option value="{{ $materiaPrima->id }}">{{ $materiaPrima->materiaPrima->nombre }}</option>
+                    <option value="{{ $materiaPrima->id }}">{{ $materiaPrima->materiaPrima->nombre }} (Stock: {{ $materiaPrima->cantidad_materia_prima_filtrada }})</option>
                 @endforeach
             </select>
         </div>
-
-        <div class="form-group">
-            <label for="cantidad">Cantidad</label>
-            <input type="number" name="cantidad" class="form-control" required>
+        <div class="mb-3">
+            <label for="cantidad" class="form-label">Cantidad</label>
+            <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" required>
         </div>
-
-        <div class="form-group">
-            <label for="precio_unitario">Precio Unitario</label>
-            <input type="number" step="0.01" name="precio_unitario" class="form-control" required>
+        <div class="mb-3">
+            <label for="precio_unitario" class="form-label">Precio Unitario</label>
+            <input type="number" class="form-control" id="precio_unitario" name="precio_unitario" min="0" step="0.01" required>
         </div>
-
-        <div class="form-group">
-            <label for="cliente_id">Cliente</label>
-            <select class="form-control" name="cliente_id">
-                <option value="">Seleccionar Cliente</option>
+        <div class="mb-3">
+            <label for="cliente_id" class="form-label">Cliente (Opcional)</label>
+            <select class="form-control" id="cliente_id" name="cliente_id">
+                <option value="" selected>Sin cliente</option>
                 @foreach($clientes as $cliente)
                     <option value="{{ $cliente->id }}">{{ $cliente->nombre }}</option>
                 @endforeach
             </select>
         </div>
-
-        <div class="form-group">
-            <label for="cuenta_id">Cuenta</label>
-            <select class="form-control" name="cuenta_id" required>
+        <div class="mb-3">
+            <label for="cuenta_id" class="form-label">Cuenta</label>
+            <select class="form-control" id="cuenta_id" name="cuenta_id" required>
+                <option value="" disabled selected>Seleccione una cuenta</option>
                 @foreach($cuentas as $cuenta)
                     <option value="{{ $cuenta->id }}">{{ $cuenta->nombre }}</option>
                 @endforeach
             </select>
         </div>
-
-        <div class="form-group">
-            <label for="a_credito">Venta a Crédito</label>
-            <select class="form-control" name="a_credito" required>
-                <option value="0">No</option>
+        <div class="mb-3">
+            <label for="a_credito" class="form-label">¿Venta a Crédito?</label>
+            <select class="form-control" id="a_credito" name="a_credito" required>
+                <option value="0" selected>No</option>
                 <option value="1">Sí</option>
             </select>
         </div>
-
-        <div class="form-group" id="credit-info" style="display: none;">
-            <label for="cuota_inicial">Cuota Inicial</label>
-            <input type="number" step="0.01" name="cuota_inicial" class="form-control" id="cuota_inicial">
-
-            <label for="saldo_deuda">Saldo de Deuda</label>
-            <input type="number" step="0.01" name="saldo_deuda" class="form-control" readonly id="saldo_deuda">
-        </div>
-
-        <button type="submit" class="btn btn-success">Registrar Venta</button>
-    </form>
+        <div class="form-group">
+    <label for="encargado">Encargado de la Venta</label>
+    <input type="text" name="encargado" id="encargado" class="form-control" value="{{ old('encargado', $venta->encargado ?? '') }}" required>
 </div>
 
-<script>
-    const creditoSelect = document.querySelector('select[name="a_credito"]');
-    const creditInfo = document.getElementById('credit-info');
-    const cantidadInput = document.querySelector('input[name="cantidad"]');
-    const precioUnitarioInput = document.querySelector('input[name="precio_unitario"]');
-    const cuotaInicialInput = document.querySelector('input[name="cuota_inicial"]');
-    const saldoDeudaInput = document.getElementById('saldo_deuda');
-
-    // Mostrar u ocultar la cuota inicial y saldo de deuda según la selección de crédito
-    creditoSelect.addEventListener('change', function() {
-        if (this.value == '1') {
-            creditInfo.style.display = 'block';
-        } else {
-            creditInfo.style.display = 'none';
-            saldoDeudaInput.value = ""; // Resetear el saldo de deuda cuando no es a crédito
-        }
-    });
-
-    // Escuchar cambios en los campos que afectan el saldo de deuda
-    cantidadInput.addEventListener('input', calcularSaldoDeuda);
-    precioUnitarioInput.addEventListener('input', calcularSaldoDeuda);
-    cuotaInicialInput.addEventListener('input', calcularSaldoDeuda);
-
-    function calcularSaldoDeuda() {
-        const cantidad = parseFloat(cantidadInput.value) || 0;
-        const precioUnitario = parseFloat(precioUnitarioInput.value) || 0;
-        const cuotaInicial = parseFloat(cuotaInicialInput.value) || 0;
-        const aCredito = creditoSelect.value === '1';
-
-        const precioTotal = cantidad * precioUnitario;
-        let saldoDeuda = 0;
-
-        if (aCredito) {
-            saldoDeuda = precioTotal - cuotaInicial;
-        } else {
-            saldoDeuda = precioTotal;
-        }
-
-        saldoDeudaInput.value = saldoDeuda.toFixed(2);
-    }
-</script>
+        <button type="submit" class="btn btn-primary">Registrar Venta</button>
+    </form>
+</div>
 @endsection

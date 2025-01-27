@@ -22,6 +22,7 @@ class VentaProducto extends Model
         'a_credito',
         'cuota_inicial',
         'saldo_deuda',
+        'encargado',
     ];
 
     // Relación con Producto

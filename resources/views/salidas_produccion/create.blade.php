@@ -5,7 +5,6 @@
     <div class="container">
         <h1>Crear Nueva Salida de Producción</h1>
 
-        <!-- Mostrar errores de validación -->
         @if($errors->any())
             <div class="alert alert-danger">
                 <ul>
@@ -16,7 +15,6 @@
             </div>
         @endif
 
-        <!-- Formulario de Salida de Producción -->
         <form action="{{ route('salidas_produccion.store') }}" method="POST">
             @csrf
 
@@ -25,7 +23,7 @@
                 <select name="entrada_produccion_id" id="entrada_produccion_id" class="form-control">
                     <option value="">Seleccione una entrada de producción</option>
                     @foreach($entradas as $entrada)
-                        <option value="{{ $entrada->id }}">{{ $entrada->id }} - {{ $entrada->producto->nombre }}</option> <!-- Muestra el producto asociado a la entrada -->
+                        <option value="{{ $entrada->id }}">{{ $entrada->id }} - {{ $entrada->producto->nombre }}</option>
                     @endforeach
                 </select>
             </div>
@@ -36,8 +34,8 @@
             </div>
 
             <div class="form-group">
-                <label for="precio_produccion">Costo de Producción</label>
-                <input type="number" name="precio_produccion" id="precio_produccion" class="form-control" required>
+                <label for="precio_produccion">Costo de Producción por Unidad</label> <!-- Cambiado aquí -->
+                <input type="number" step="0.01" name="precio_produccion" id="precio_produccion" class="form-control" required>
             </div>
 
             <div class="form-group">

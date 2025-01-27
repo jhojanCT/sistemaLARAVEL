@@ -7,6 +7,7 @@ use App\Models\VentaMateriaPrima;
 use App\Models\VentaProducto;
 use App\Models\Cuenta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PagoController extends Controller
 {
@@ -51,18 +52,21 @@ class PagoController extends Controller
             return redirect()->route('pagos.show', [$venta->id, $type])->with('error', 'El monto excede la deuda restante.');
         }
 
-        // Registrar el nuevo pago
-        $pago = Pago::registrarPagoUnico($venta, $request->monto, $request->cuota_numero); // Usamos el método estático para evitar pagos duplicados
+        // Registrar el nuevo pago dentro de una transacción para evitar inconsistencias
+        DB::transaction(function () use ($venta, $request) {
+            // Registrar el nuevo pago
+            $pago = Pago::registrarPagoUnico($venta, $request->monto, $request->cuota_numero); 
 
-        if (!$pago) {
-            return redirect()->route('pagos.show', [$venta->id, $type])->with('error', 'El pago ya ha sido registrado para esta cuota.');
-        }
+            if (!$pago) {
+                throw new \Exception('El pago ya ha sido registrado para esta cuota.');
+            }
 
-        // Actualizar saldo de la venta
-        $this->updateVentaSaldo($venta);
+            // Actualizar saldo de la venta
+            $this->updateVentaSaldo($venta);
 
-        // Actualizar la cuenta asociada
-        $this->updateCuenta($venta, $request->monto);
+            // Actualizar la cuenta asociada
+            $this->updateCuenta($venta, $request->monto);
+        });
 
         return redirect()->route('pagos.show', [$venta->id, $type])->with('success', 'Pago registrado correctamente.');
     }
@@ -70,13 +74,8 @@ class PagoController extends Controller
     // Obtener la venta según el tipo (materia_prima o producto)
     private function getVentaByType($id, $type)
     {
-        if ($type === 'materia_prima') {
-            return VentaMateriaPrima::find($id);
-        } elseif ($type === 'producto') {
-            return VentaProducto::find($id);
-        }
-
-        return null;
+        return $type === 'materia_prima' ? VentaMateriaPrima::find($id) : 
+               ($type === 'producto' ? VentaProducto::find($id) : null);
     }
 
     // Actualizar el saldo de la venta después de un pago
@@ -99,8 +98,7 @@ class PagoController extends Controller
         $cuenta = Cuenta::find($venta->cuenta_id);
 
         if ($cuenta) {
-            $cuenta->saldo += $monto;
-            $cuenta->save();
+            $cuenta->increment('saldo', $monto);
         }
     }
 }
