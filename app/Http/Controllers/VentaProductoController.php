@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\VentaProducto;
+use App\Models\Pago;
 use App\Models\Producto;
 use App\Models\Cliente;
 use App\Models\Cuenta;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
