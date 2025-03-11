@@ -158,4 +158,32 @@ class ControlEntradaMateriaPrimaController extends Controller
         return redirect()->route('control_entrada_materia_prima.index')
                          ->with('success', 'Entrada de Materia Prima actualizada correctamente.');
     }
+    public function destroy($id)
+    {
+    // Buscar la entrada por su ID
+    $entrada = ControlEntradaMateriaPrima::findOrFail($id);
+
+    // Ajustar la cantidad en el almacén
+    $almacen = AlmacenSinFiltro::where('proveedor_id', $entrada->proveedor_id)
+                               ->where('materia_prima_id', $entrada->materia_prima_id)
+                               ->first();
+
+    if ($almacen) {
+        $almacen->cantidad_total -= $entrada->cantidad;
+        $almacen->save();
+    }
+
+    // Si hay un registro de crédito asociado, eliminarlo
+    if ($entrada->creditoCompra) {
+        $entrada->creditoCompra->delete();
+    }
+
+    // Eliminar la entrada de materia prima
+    $entrada->delete();
+
+    return redirect()->route('control_entrada_materia_prima.index')
+                     ->with('success', 'Entrada de Materia Prima eliminada correctamente.');
+ 
+
+}
 }

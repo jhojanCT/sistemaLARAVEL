@@ -37,6 +37,7 @@ class Pago extends Model
                 'venta_id' => $venta->id,
                 'venta_type' => get_class($venta),
                 'cuota_numero' => $cuota_numero,
+                'fecha_pago' => now(), // Aseguramos que la fecha actual se guarde
             ]);
         }
 

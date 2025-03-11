@@ -7,7 +7,6 @@ use App\Models\Pago;
 use App\Models\Producto;
 use App\Models\Cliente;
 use App\Models\Cuenta;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -66,10 +65,11 @@ class VentaProductoController extends Controller
             $producto->decrement('cantidad', $request->cantidad);
 
             if (!$request->a_credito) {
+                // Si no es a crédito, se actualiza directamente el saldo de la cuenta
                 $cuenta = Cuenta::findOrFail($request->cuenta_id);
                 $cuenta->increment('saldo', $precioTotal);
             } else {
-                // Crear pago inicial si es a crédito
+                // Si es a crédito, se crea el pago inicial
                 Pago::create([
                     'venta_id' => $venta->id,
                     'monto' => $saldoDeuda,

@@ -14,7 +14,7 @@
         </thead>
         <tbody>
             @foreach($cuentas as $cuenta)
-            <tr>
+            <tr>    
                 <td>{{ $cuenta->nombre }}</td>
                 <td>Bs{{ number_format($cuenta->saldo, 2) }}</td>
                 <td>
@@ -25,19 +25,16 @@
                     <a href="{{ route('cuentas.edit', $cuenta->id) }}" class="btn btn-warning">Editar</a>
                     
                     <!-- Formulario para Eliminar -->
+                    @if($cuenta->nombre !== 'Bóveda')
+                        <form action="{{ route('cuentas.destroy', $cuenta->id) }}" method="POST" style="display: inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta cuenta?')">Eliminar</button>
+                        </form>
+                    @endif
                 </td>
             </tr>
             @endforeach
-
-            <!-- Fila para mostrar la Cuenta General -->
-            <tr>
-                <td><strong>Cuenta General</strong></td>
-                <td><strong>Bs{{ number_format($totalSaldo, 2) }}</strong></td>
-                <td>
-                    <!-- Botón de Ver detalles para la Cuenta General -->
-
-                </td>
-            </tr>
         </tbody>
     </table>
 </div>

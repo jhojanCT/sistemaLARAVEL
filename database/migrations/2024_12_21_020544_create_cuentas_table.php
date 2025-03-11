@@ -18,13 +18,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Crear la cuenta por defecto
-        DB::table('cuentas')->insert([
-            'nombre' => 'Cuenta General',
-            'saldo' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
     }
 
     /**

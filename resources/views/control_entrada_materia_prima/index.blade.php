@@ -37,6 +37,11 @@
                         <td>{{ $entrada->compra_credito ? 'Sí' : 'No' }}</td>
                         <td>
                             <a href="{{ route('control_entrada_materia_prima.edit', $entrada->id) }}" class="btn btn-warning">Editar</a>
+                            <form action="{{ route('control_entrada_materia_prima.destroy', $entrada->id) }}" method="POST" style="display:inline-block;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta entrada?')">Eliminar</button>
+                            </form>
                         </td>
                     </tr>
                 @endforeach

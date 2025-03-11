@@ -54,7 +54,7 @@ class PagoController extends Controller
 
         // Registrar el nuevo pago dentro de una transacción para evitar inconsistencias
         DB::transaction(function () use ($venta, $request) {
-            // Registrar el nuevo pago
+            // Registrar el nuevo pago, incluyendo la fecha de pago
             $pago = Pago::registrarPagoUnico($venta, $request->monto, $request->cuota_numero); 
 
             if (!$pago) {
