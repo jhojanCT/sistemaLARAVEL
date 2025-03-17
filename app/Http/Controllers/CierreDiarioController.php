@@ -22,16 +22,21 @@ class CierreDiarioController extends Controller
             return back()->with('error', 'Debe realizar la apertura antes de cerrar el día.');
         }
 
-        // Obtener el total de ventas y pagos del día
-        $totalVentasMateriaPrima = VentaMateriaPrima::whereDate('created_at', $fechaHoy)->sum('precio_total');
-        $totalVentasProducto = VentaProducto::whereDate('created_at', $fechaHoy)->sum('precio_total');
-        $totalPagos = Pago::whereDate('created_at', $fechaHoy)->sum('monto');
+        // Obtener las ventas y pagos del día
+        $ventasMateriaPrima = VentaMateriaPrima::whereDate('created_at', $fechaHoy)->get();
+        $ventasProducto = VentaProducto::whereDate('created_at', $fechaHoy)->get();
+        $pagos = Pago::whereDate('created_at', $fechaHoy)->get();
 
-        // Calcular el saldo final
+        // Calcular totales
+        $totalVentasMateriaPrima = $ventasMateriaPrima->sum('precio_total');
+        $totalVentasProducto = $ventasProducto->sum('precio_total');
+        $totalPagos = $pagos->sum('monto');
+
+        // Calcular saldo final
         $saldoFinal = $apertura->saldo_inicial + $totalVentasMateriaPrima + $totalVentasProducto - $totalPagos;
 
         // Guardar el cierre del día
-        CierreDiario::create([
+        $cierre = CierreDiario::create([
             'fecha' => $fechaHoy,
             'total_ventas_materia_prima' => $totalVentasMateriaPrima,
             'total_ventas_producto' => $totalVentasProducto,
@@ -39,12 +44,27 @@ class CierreDiarioController extends Controller
             'saldo_final' => $saldoFinal,
         ]);
 
-        return redirect()->route('cierres.index')->with('success', 'Cierre diario realizado.');
+        return redirect()->route('cierres.show', $cierre->id)->with('success', 'Cierre diario realizado.');
     }
 
     public function index()
     {
         $cierres = CierreDiario::all();
         return view('cierres.index', compact('cierres'));
+    }
+
+    public function show($id)
+    {
+        $cierre = CierreDiario::findOrFail($id);
+        
+        // Obtener la apertura correspondiente a esta fecha
+        $apertura = AperturaDiaria::where('fecha', $cierre->fecha)->first();
+
+        // Obtener ventas y pagos del día
+        $ventasMateriaPrima = VentaMateriaPrima::whereDate('created_at', $cierre->fecha)->get();
+        $ventasProducto = VentaProducto::whereDate('created_at', $cierre->fecha)->get();
+        $pagos = Pago::whereDate('created_at', $cierre->fecha)->get();
+
+        return view('cierres.show', compact('cierre', 'apertura', 'ventasMateriaPrima', 'ventasProducto', 'pagos'));
     }
 }
