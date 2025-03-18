@@ -27,6 +27,7 @@ class CreditoCompra extends Model
     {
         return $this->belongsTo(ControlEntradaMateriaPrima::class, 'control_entrada_id');
     }
+    
     public function pagos()
     {
         return $this->hasMany(PagoCreditoCompra::class);

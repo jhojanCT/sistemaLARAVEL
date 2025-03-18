@@ -131,4 +131,42 @@ class CuentaController extends Controller
         $cuenta->delete();
         return redirect()->route('cuentas.index')->with('success', 'Cuenta eliminada con éxito.');
     }
+
+    public function aperturaDiaria()
+{
+    $fechaHoy = now()->toDateString();
+    $fechaAyer = now()->subDay()->toDateString();
+
+    // Verificar si la apertura ya fue registrada hoy
+    if (AperturaDiaria::whereDate('fecha', $fechaHoy)->exists()) {
+        return redirect()->back()->with('error', 'La apertura ya fue registrada hoy.');
+    }
+
+    // Obtener el último cierre diario
+    $ultimoCierre = CierreDiario::whereDate('fecha', $fechaAyer)->latest()->first();
+
+    if (!$ultimoCierre) {
+        return redirect()->back()->with('error', 'No hay un cierre anterior registrado.');
+    }
+
+    // Tomar los saldos finales del cierre anterior
+    $saldosAnteriores = json_decode($ultimoCierre->detalles, true);
+    $detalleCuentas = [];
+
+    foreach ($saldosAnteriores as $cuentaAnterior) {
+        $detalleCuentas[] = [
+            'nombre' => $cuentaAnterior['nombre'],
+            'saldo_inicial' => $cuentaAnterior['saldo_final'],
+        ];
+    }
+
+    // Registrar la apertura
+    AperturaDiaria::create([
+        'fecha' => now(),
+        'detalles' => json_encode($detalleCuentas, JSON_PRETTY_PRINT),
+    ]);
+
+    return redirect()->route('dashboard')->with('success', 'Apertura diaria registrada con éxito.');
+}
+
 }

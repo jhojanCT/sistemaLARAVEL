@@ -23,6 +23,10 @@ use App\Http\Controllers\VentaProductoController;
 use App\Http\Controllers\CuentaController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\CreditoCompraController;
+use App\Http\Controllers\AperturaDiariaController;
+use App\Http\Controllers\CierreDiarioController;
+
+
 
 
 
@@ -88,6 +92,14 @@ Route::middleware('auth')->group(function () {
         Route::put('/{venta}', [VentaMateriaPrimaController::class, 'update'])->name('update');
         Route::delete('/{venta}', [VentaMateriaPrimaController::class, 'destroy'])->name('destroy');
     });
+
+
+    Route::resource('aperturas', AperturaDiariaController::class);
+    Route::resource('cierres', CierreDiarioController::class);
+
+    // Rutas para apertura y cierre del día
+    Route::post('aperturas/abrir', [AperturaDiariaController::class, 'abrirDia'])->name('aperturas.abrir');
+    Route::post('cierres/cerrar', [CierreDiarioController::class, 'cerrarDia'])->name('cierres.cerrar');
 });
 
 Route::get('/', function () {
