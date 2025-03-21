@@ -16,6 +16,7 @@ return new class extends Migration
             $table->date('fecha')->unique();
             $table->decimal('total_ventas_materia_prima', 10, 2)->default(0);
             $table->decimal('total_ventas_producto', 10, 2)->default(0);
+            $table->decimal('total_compras_materia_prima', 10, 2)->default(0);
             $table->decimal('total_pagos', 10, 2)->default(0);
             $table->decimal('saldo_final', 10, 2)->default(0);
             $table->timestamps();
