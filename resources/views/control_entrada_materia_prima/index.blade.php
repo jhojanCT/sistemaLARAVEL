@@ -33,7 +33,7 @@
                         <td>{{ $entrada->cantidad }}</td>
                         <td>{{ $entrada->encargado }}</td>
                         <td>{{ $entrada->fecha_llegada }}</td>
-                        <td>Bs{{ number_format($entrada->precio_total, 2) }}</td>
+                        <td>Bs {{ number_format($entrada->precio_total, 2) }}</td>
                         <td>{{ $entrada->compra_credito ? 'Sí' : 'No' }}</td>
                         <td>
                             <a href="{{ route('control_entrada_materia_prima.edit', $entrada->id) }}" class="btn btn-warning">Editar</a>

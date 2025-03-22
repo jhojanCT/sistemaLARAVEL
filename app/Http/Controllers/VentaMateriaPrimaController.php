@@ -161,4 +161,26 @@ class VentaMateriaPrimaController extends Controller
     
         return redirect()->route('ventas.materia_prima.index')->with('success', 'Venta actualizada con éxito');
     }
+
+    public function destroy($id)
+{
+    DB::transaction(function () use ($id) {
+        $venta = VentaMateriaPrima::findOrFail($id);
+        $almacenFiltrado = AlmacenFiltrado::findOrFail($venta->materia_prima_id);
+
+        // Devolver la cantidad vendida al stock
+        $almacenFiltrado->increment('cantidad_materia_prima_filtrada', $venta->cantidad);
+
+        // Eliminar pagos asociados si la venta fue a crédito
+        if ($venta->a_credito) {
+            Pago::where('venta_id', $venta->id)->delete();
+        }
+
+        // Eliminar la venta
+        $venta->delete();
+    });
+
+    return redirect()->route('ventas.materia_prima.index')->with('success', 'Venta eliminada correctamente.');
+}
+
 }

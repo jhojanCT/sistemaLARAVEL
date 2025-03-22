@@ -44,9 +44,12 @@ class MateriaPrimaController extends Controller
     
     
 
-    public function destroy(MateriaPrima $materiaPrima)
+    public function destroy($id)
     {
+        $materiaPrima = MateriaPrima::findOrFail($id);
         $materiaPrima->delete();
         return redirect()->route('materias_primas.index')->with('success', 'Materia prima eliminada exitosamente.');
     }
+    
+    
 }

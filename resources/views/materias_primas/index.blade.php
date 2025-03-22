@@ -21,7 +21,7 @@
                         <form action="{{ route('materias_primas.destroy', $materiaPrima) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta materia prima?')">Eliminar</button>
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
                         </form>
                     </td>
                 </tr>
